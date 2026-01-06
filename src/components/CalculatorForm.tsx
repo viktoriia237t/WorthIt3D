@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 // Модульні імпорти HeroUI
 import { Input, Textarea } from '@heroui/input';
 import { Card, CardBody, CardHeader } from '@heroui/card';
@@ -46,6 +47,7 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({
                                                                   note = '',
                                                                   onNoteChange,
                                                               }) => {
+    const { t, i18n } = useTranslation();
     const [state, setState] = useState<CalculationState>(initialState);
 
     // Синхронізація локального стану з initialState (для редагування)
@@ -104,26 +106,26 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({
 
             {/* ІНФОРМАЦІЯ ПРО МОДЕЛЬ */}
             <FormSection
-                title="Інформація про модель"
-                subtitle="Назва та посилання для ідентифікації"
+                title={t('form.modelInfo.title')}
+                subtitle={t('form.modelInfo.title')}
                 icon={<FileText size={22} className="text-green-500" />}
             >
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <Input
                         type="text"
                         variant="flat"
-                        label="Назва моделі"
+                        label={t('form.modelInfo.name')}
                         labelPlacement="outside"
-                        placeholder="Наприклад: Фігурка дракона"
+                        placeholder={t('form.modelInfo.namePlaceholder')}
                         value={modelName}
                         onChange={(e) => onModelNameChange?.(e.target.value)}
                     />
                     <Input
                         type="text"
                         variant="flat"
-                        label="Посилання на модель"
+                        label={t('form.modelInfo.link')}
                         labelPlacement="outside"
-                        placeholder="https://www.thingiverse.com/..."
+                        placeholder={t('form.modelInfo.linkPlaceholder')}
                         value={modelLink}
                         onChange={(e) => onModelLinkChange?.(e.target.value)}
                     />
@@ -132,30 +134,30 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({
 
             {/* 1. МАТЕРІАЛИ */}
             <FormSection
-                title="1. Матеріали"
-                subtitle="Пластик або фотополімерна смола"
+                title={`1. ${t('form.materials.title')}`}
+                subtitle={t('form.materials.title')}
                 icon={<Package size={22} className="text-blue-500" />}
             >
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <Input
                         type="number"
                         variant="flat"
-                        label="Вага моделі"
+                        label={t('form.materials.weight')}
                         labelPlacement="outside"
                         placeholder="0.00"
                         startContent={<Weight size={18} className="text-default-400" />}
-                        endContent={<span className="text-tiny text-default-400">г</span>}
+                        endContent={<span className="text-tiny text-default-400">{t('units.grams')}</span>}
                         value={state.weight.toString()}
                         onChange={(e) => handleChange('weight', parseFloat(e.target.value) || 0)}
                     />
                     <Input
                         type="number"
                         variant="flat"
-                        label="Ціна котушки/літра"
+                        label={t('form.materials.spoolPrice')}
                         labelPlacement="outside"
                         placeholder="800"
                         startContent={<CircleDollarSign size={18} className="text-default-400" />}
-                        endContent={<span className="text-tiny text-default-400">грн</span>}
+                        endContent={<span className="text-tiny text-default-400">{t('units.uah')}</span>}
                         value={state.spoolPrice.toString()}
                         onChange={(e) => handleChange('spoolPrice', parseFloat(e.target.value) || 0)}
                     />
@@ -163,10 +165,10 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({
                         className="md:col-span-2"
                         type="number"
                         variant="flat"
-                        label="Загальна вага котушки"
+                        label={t('form.materials.spoolWeight')}
                         labelPlacement="outside"
                         placeholder="1000"
-                        endContent={<span className="text-tiny text-default-400">г</span>}
+                        endContent={<span className="text-tiny text-default-400">{t('units.grams')}</span>}
                         value={state.spoolWeight.toString()}
                         onChange={(e) => handleChange('spoolWeight', parseFloat(e.target.value) || 0)}
                     />
@@ -175,52 +177,52 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({
 
             {/* 2. ЧАСОВІ ВИТРАТИ */}
             <FormSection
-                title="2. Часові витрати"
-                subtitle="Друк та ручна робота"
+                title={`2. ${t('form.time.title')}`}
+                subtitle={t('form.time.title')}
                 icon={<Clock size={22} className="text-orange-500" />}
             >
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                     <Input
                         type="number"
                         variant="flat"
-                        label="Друк"
+                        label={t('form.time.printTime')}
                         labelPlacement="outside"
                         value={state.printTime.toString()}
                         onChange={(e) => handleChange('printTime', parseFloat(e.target.value) || 0)}
-                        endContent={<span className="text-tiny text-default-400">год</span>}
+                        endContent={<span className="text-tiny text-default-400">{t('units.hours')}</span>}
                     />
                     <Input
                         type="number"
                         variant="flat"
-                        label="Підготовка"
+                        label={t('form.time.prepTime')}
                         labelPlacement="outside"
                         value={state.prepTime.toString()}
                         onChange={(e) => handleChange('prepTime', parseFloat(e.target.value) || 0)}
-                        endContent={<span className="text-tiny text-default-400">год</span>}
+                        endContent={<span className="text-tiny text-default-400">{t('units.hours')}</span>}
                     />
                     <Input
                         type="number"
                         variant="flat"
-                        label="Пост-обробка"
+                        label={t('form.time.postTime')}
                         labelPlacement="outside"
                         value={state.postTime.toString()}
                         onChange={(e) => handleChange('postTime', parseFloat(e.target.value) || 0)}
-                        endContent={<span className="text-tiny text-default-400">год</span>}
+                        endContent={<span className="text-tiny text-default-400">{t('units.hours')}</span>}
                     />
                 </div>
             </FormSection>
 
             {/* 3. ЕЛЕКТРИКА ТА АМОРТИЗАЦІЯ */}
             <FormSection
-                title="3. Технічні витрати"
-                subtitle="Енергія та знос обладнання"
+                title={`3. ${t('form.electricity.title')} & ${t('form.depreciation.title')}`}
+                subtitle={t('form.electricity.title')}
                 icon={<Cpu size={22} className="text-purple-500" />}
             >
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <Input
                         type="number"
                         variant="flat"
-                        label="Споживання (кВт)"
+                        label={t('form.electricity.powerConsumption')}
                         labelPlacement="outside"
                         startContent={<Zap size={18} className="text-default-400" />}
                         value={state.powerConsumption.toString()}
@@ -229,7 +231,7 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({
                     <Input
                         type="number"
                         variant="flat"
-                        label="Тариф (грн/кВт)"
+                        label={t('form.electricity.tariff')}
                         labelPlacement="outside"
                         value={state.electricityTariff.toString()}
                         onChange={(e) => handleChange('electricityTariff', parseFloat(e.target.value) || 0)}
@@ -237,7 +239,7 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({
                     <Input
                         type="number"
                         variant="flat"
-                        label="Вартість принтера"
+                        label={t('form.depreciation.printerPrice')}
                         labelPlacement="outside"
                         startContent={<Wrench size={18} className="text-default-400" />}
                         value={state.printerPrice.toString()}
@@ -246,7 +248,7 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({
                     <Input
                         type="number"
                         variant="flat"
-                        label="Ресурс принтера (год)"
+                        label={t('form.depreciation.lifespan')}
                         labelPlacement="outside"
                         value={state.lifespan.toString()}
                         onChange={(e) => handleChange('lifespan', parseFloat(e.target.value) || 0)}
@@ -254,36 +256,32 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({
                     <Input
                         type="number"
                         variant="flat"
-                        label="Вартість сопла"
+                        label={t('form.depreciation.nozzlePrice')}
                         labelPlacement="outside"
-                        description="Ціна одного сопла (грн)"
                         value={state.nozzlePrice.toString()}
                         onChange={(e) => handleChange('nozzlePrice', parseFloat(e.target.value) || 0)}
                     />
                     <Input
                         type="number"
                         variant="flat"
-                        label="Ресурс сопла (год)"
+                        label={t('form.depreciation.nozzleLifespan')}
                         labelPlacement="outside"
-                        description="Ресурс до заміни"
                         value={state.nozzleLifespan.toString()}
                         onChange={(e) => handleChange('nozzleLifespan', parseFloat(e.target.value) || 0)}
                     />
                     <Input
                         type="number"
                         variant="flat"
-                        label="Вартість столу/плити"
+                        label={t('form.depreciation.bedPrice')}
                         labelPlacement="outside"
-                        description="Ціна столу або покриття (грн)"
                         value={state.bedPrice.toString()}
                         onChange={(e) => handleChange('bedPrice', parseFloat(e.target.value) || 0)}
                     />
                     <Input
                         type="number"
                         variant="flat"
-                        label="Ресурс столу (год)"
+                        label={t('form.depreciation.bedLifespan')}
                         labelPlacement="outside"
-                        description="Ресурс до заміни"
                         value={state.bedLifespan.toString()}
                         onChange={(e) => handleChange('bedLifespan', parseFloat(e.target.value) || 0)}
                     />
@@ -292,25 +290,25 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({
 
             {/* 4. БІЗНЕС */}
             <FormSection
-                title="4. Бізнес та робота"
-                subtitle="Прибуток та оплата праці"
+                title={`4. ${t('form.business.title')}`}
+                subtitle={t('form.business.title')}
                 icon={<TrendingUp size={22} className="text-success-500" />}
             >
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <Input
                         type="number"
                         variant="flat"
-                        label="Ставка майстра"
+                        label={t('form.labor.hourlyRate')}
                         labelPlacement="outside"
                         startContent={<User size={18} className="text-default-400" />}
-                        endContent={<span className="text-tiny text-default-400">грн/год</span>}
+                        endContent={<span className="text-tiny text-default-400">{t('units.uahPerHour')}</span>}
                         value={state.hourlyRate.toString()}
                         onChange={(e) => handleChange('hourlyRate', parseFloat(e.target.value) || 0)}
                     />
                     <Input
                         type="number"
                         variant="flat"
-                        label="Націнка (коефіцієнт)"
+                        label={t('form.business.markup')}
                         labelPlacement="outside"
                         placeholder="1.5"
                         value={state.markup.toString()}
@@ -319,7 +317,7 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({
                     <Input
                         type="number"
                         variant="flat"
-                        label="Ризик браку"
+                        label={t('form.business.failureRate')}
                         labelPlacement="outside"
                         placeholder="1.1"
                         value={state.failureRate.toString()}
@@ -328,38 +326,43 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({
                     <Input
                         type="number"
                         variant="flat"
-                        label="Інші витрати"
+                        label={t('form.additional.consumables')}
                         labelPlacement="outside"
                         startContent={<PlusCircle size={18} className="text-default-400" />}
                         value={state.consumables.toString()}
                         onChange={(e) => handleChange('consumables', parseFloat(e.target.value) || 0)}
                     />
                 </div>
-                <Divider className="my-2" />
-                <div className="flex flex-col gap-2">
-                    <Switch
-                        isSelected={state.includeOlxFee}
-                        onValueChange={(value) => handleBooleanChange('includeOlxFee', value)}
-                        classNames={{
-                            base: "inline-flex flex-row-reverse w-full max-w-full bg-content1 hover:bg-content2 items-center justify-between cursor-pointer rounded-lg gap-2 p-4 border-2 border-transparent data-[selected=true]:border-primary",
-                            wrapper: "p-0 h-4 overflow-visible",
-                            thumb: "w-6 h-6 border-2 shadow-lg group-data-[selected=true]:ml-6"
-                        }}
-                    >
-                        <div className="flex flex-col gap-1">
-                            <p className="text-medium font-semibold">Додати комісію OLX</p>
-                            <p className="text-tiny text-default-400">
-                                Розрахувати вартість з урахуванням комісії OLX (+2% + 20 грн)
-                            </p>
+                {/* Показуємо OLX тільки для української мови */}
+                {i18n.language === 'uk' && (
+                    <>
+                        <Divider className="my-2" />
+                        <div className="flex flex-col gap-2">
+                            <Switch
+                                isSelected={state.includeOlxFee}
+                                onValueChange={(value) => handleBooleanChange('includeOlxFee', value)}
+                                classNames={{
+                                    base: "inline-flex flex-row-reverse w-full max-w-full bg-content1 hover:bg-content2 items-center justify-between cursor-pointer rounded-lg gap-2 p-4 border-2 border-transparent data-[selected=true]:border-primary",
+                                    wrapper: "p-0 h-4 overflow-visible",
+                                    thumb: "w-6 h-6 border-2 shadow-lg group-data-[selected=true]:ml-6"
+                                }}
+                            >
+                                <div className="flex flex-col gap-1">
+                                    <p className="text-medium font-semibold">{t('form.business.includeOlxFee')}</p>
+                                    <p className="text-tiny text-default-400">
+                                        {t('form.business.includeOlxFee')}
+                                    </p>
+                                </div>
+                            </Switch>
                         </div>
-                    </Switch>
-                </div>
+                    </>
+                )}
             </FormSection>
 
             {/* 5. ДОДАТКОВІ ВИТРАТИ */}
             <FormSection
-                title="5. Додаткові витрати"
-                subtitle="Пакування, доставка, OLX тощо"
+                title={`5. ${t('form.additional.title')}`}
+                subtitle={t('form.additional.customExpenses')}
                 icon={<PlusCircle size={22} className="text-amber-500" />}
             >
                 <div className="flex flex-col gap-3">
@@ -368,19 +371,19 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({
                             <Input
                                 type="text"
                                 variant="flat"
-                                label="Назва витрати"
+                                label={t('form.additional.expenseName')}
                                 labelPlacement="outside"
-                                placeholder="Наприклад: Доставка Нова Пошта"
+                                placeholder={t('form.additional.expenseName')}
                                 value={expense.name}
                                 onChange={(e) => handleUpdateCustomExpense(expense.id, 'name', e.target.value)}
                             />
                             <Input
                                 type="number"
                                 variant="flat"
-                                label="Сума"
+                                label={t('form.additional.expenseAmount')}
                                 labelPlacement="outside"
                                 placeholder="0"
-                                endContent={<span className="text-tiny text-default-400">грн</span>}
+                                endContent={<span className="text-tiny text-default-400">{t('units.uah')}</span>}
                                 value={expense.amount.toString()}
                                 onChange={(e) => handleUpdateCustomExpense(expense.id, 'amount', parseFloat(e.target.value) || 0)}
                             />
@@ -402,7 +405,7 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({
                         onPress={handleAddCustomExpense}
                         className="w-full md:w-auto"
                     >
-                        Додати витрату
+                        {t('form.additional.addExpense')}
                     </Button>
                 </div>
             </FormSection>
@@ -412,12 +415,12 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({
                 <Card shadow="sm" className="border-none bg-default-50">
                     <CardHeader className="flex gap-3">
                         <FileText size={20} className="text-default-500" />
-                        <p className="font-bold">Нотатки до замовлення</p>
+                        <p className="font-bold">{t('form.modelInfo.note')}</p>
                     </CardHeader>
                     <CardBody>
                         <Textarea
                             variant="bordered"
-                            placeholder="Вкажіть назву моделі або особливі побажання..."
+                            placeholder={t('form.modelInfo.notePlaceholder')}
                             value={note}
                             onChange={(e) => onNoteChange(e.target.value)}
                             minRows={3}

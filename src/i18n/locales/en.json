@@ -1,0 +1,158 @@
+{
+  "header": {
+    "title": "3D Printing Cost Calculator",
+    "subtitle": "Professional calculation of cost price and client price"
+  },
+  "tabs": {
+    "calculator": "Calculator",
+    "history": "History"
+  },
+  "editMode": {
+    "title": "Edit Mode",
+    "subtitle": "You are editing an existing calculation",
+    "cancel": "Cancel"
+  },
+  "buttons": {
+    "save": "Save Calculation",
+    "update": "Update Calculation",
+    "cancel": "Cancel",
+    "clear": "Clear Form",
+    "clearAll": "Clear All",
+    "close": "Close",
+    "loadToCalculator": "Load to Calculator",
+    "delete": "Delete"
+  },
+  "toast": {
+    "saved": "Calculation saved successfully!",
+    "updated": "Calculation updated successfully!",
+    "savedDescription": "Added to history",
+    "updatedDescription": "Changes saved",
+    "historyCleared": "History cleared"
+  },
+  "history": {
+    "title": "Calculation History",
+    "empty": "Calculation history is empty",
+    "emptyDescription": "Your saved calculations will appear here after creation",
+    "recordsSaved": "records saved",
+    "columns": {
+      "dateAndNote": "DATE AND NOTE",
+      "parameters": "PARAMETERS",
+      "cost": "COST PRICE",
+      "clientPrice": "CLIENT PRICE",
+      "actions": "ACTIONS"
+    },
+    "noName": "Untitled",
+    "tooltips": {
+      "details": "Details",
+      "edit": "Edit",
+      "delete": "Delete"
+    },
+    "confirmDelete": {
+      "title": "Delete all history?",
+      "message": "Are you sure you want to delete all calculation history? This action cannot be undone."
+    }
+  },
+  "modal": {
+    "title": "Calculation Details",
+    "modelName": "Model Name",
+    "modelLink": "Model Link",
+    "note": "Note",
+    "weight": "Model Weight",
+    "printTime": "Print Time",
+    "costBreakdown": "Cost Breakdown",
+    "materials": "Materials",
+    "electricity": "Electricity",
+    "labor": "Labor",
+    "depreciation": "Depreciation",
+    "finalPrice": "Final Price",
+    "yourProfit": "Your Profit"
+  },
+  "form": {
+    "modelInfo": {
+      "title": "Model Information",
+      "name": "Model Name",
+      "namePlaceholder": "Enter model name",
+      "link": "Model Link",
+      "linkPlaceholder": "https://...",
+      "note": "Note",
+      "notePlaceholder": "Additional information"
+    },
+    "materials": {
+      "title": "Materials",
+      "weight": "Model weight with supports (grams)",
+      "spoolPrice": "Spool price ($)",
+      "spoolWeight": "Spool weight (grams)"
+    },
+    "time": {
+      "title": "Time",
+      "printTime": "Print duration (hours)",
+      "prepTime": "Preparation time (hours)",
+      "postTime": "Post-processing time (hours)"
+    },
+    "electricity": {
+      "title": "Electricity",
+      "powerConsumption": "Printer consumption (kW)",
+      "tariff": "Cost per 1 kWh ($)"
+    },
+    "depreciation": {
+      "title": "Depreciation",
+      "printerPrice": "Printer cost ($)",
+      "lifespan": "Estimated lifespan (hours)",
+      "nozzlePrice": "Nozzle cost ($)",
+      "nozzleLifespan": "Nozzle lifespan (hours)",
+      "bedPrice": "Bed/plate cost ($)",
+      "bedLifespan": "Bed lifespan (hours)"
+    },
+    "labor": {
+      "title": "Labor",
+      "hourlyRate": "Hourly rate ($/hr)"
+    },
+    "business": {
+      "title": "Business Parameters",
+      "failureRate": "Failed print margin (%)",
+      "markup": "Markup (%)",
+      "includeOlxFee": "Include OLX fee (+2% + 20$)"
+    },
+    "additional": {
+      "title": "Additional Costs",
+      "consumables": "Consumables ($)",
+      "customExpenses": "Custom Expenses",
+      "addExpense": "Add Expense",
+      "expenseName": "Expense name",
+      "expenseAmount": "Amount ($)"
+    }
+  },
+  "result": {
+    "title": "Calculation Results",
+    "costBreakdown": "Cost Details",
+    "materials": "Materials",
+    "electricity": "Electricity",
+    "depreciation": "Depreciation",
+    "labor": "Labor",
+    "consumables": "Consumables",
+    "customExpenses": "Additional Costs",
+    "subtotal": "Subtotal",
+    "failureRate": "Failure Reserve",
+    "totalCost": "Cost Price",
+    "markup": "Markup",
+    "finalPrice": "Final Client Price",
+    "profit": "Your Profit",
+    "olxPrice": "Price with OLX fee",
+    "olxProfit": "Profit after OLX",
+    "tip": "Tip:",
+    "tipMessage": "This price is calculated based on your settings. You can adjust the markup in the configuration menu for competitiveness."
+  },
+  "footer": {
+    "line1": "Professional tool for calculating 3D printing costs with all expenses included",
+    "line2": "Includes materials, electricity, depreciation, labor, and business risks"
+  },
+  "units": {
+    "grams": "g",
+    "hours": "hrs",
+    "uah": "$",
+    "uahPerHour": "$/hr",
+    "kw": "kW",
+    "uahPerKwh": "$/kWh",
+    "currencySymbol": "$"
+  }
+}

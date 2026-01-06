@@ -7,7 +7,8 @@
     "dev": "vite",
     "build": "tsc -b && vite build",
     "lint": "eslint .",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "deploy": "gh-pages -d dist"
   },
   "dependencies": {
     "@heroui/button": "^2.2.29",
@@ -24,11 +25,13 @@
     "@heroui/toast": "^2.0.19",
     "@heroui/tooltip": "^2.2.26",
     "framer-motion": "^12.24.5",
+    "i18next": "^25.7.3",
     "lucide-react": "^0.562.0",
     "next-themes": "^0.4.6",
     "react": "^19.2.0",
     "react-dom": "^19.2.0",
-    "react-hook-form": "^7.70.0"
+    "react-hook-form": "^7.70.0",
+    "react-i18next": "^16.5.1"
   },
   "devDependencies": {
     "@eslint/js": "^9.39.1",
@@ -42,6 +45,7 @@
     "eslint": "^9.39.1",
     "eslint-plugin-react-hooks": "^7.0.1",
     "eslint-plugin-react-refresh": "^0.4.24",
+    "gh-pages": "^6.3.0",
     "globals": "^16.5.0",
     "postcss": "^8.5.6",
     "tailwindcss": "^4.1.18",

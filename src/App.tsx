@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import {Card, CardBody, } from "@heroui/card";
 import { Button} from "@heroui/button";
 import { Tabs, Tab } from "@heroui/tabs";
@@ -6,6 +7,7 @@ import { ToastProvider, addToast } from "@heroui/toast";
 import { CalculatorForm } from './components/CalculatorForm';
 import { CalculationResultComponent } from './components/CalculationResult';
 import { CalculationHistory } from './components/CalculationHistory';
+import { LanguageSwitcher } from './components/LanguageSwitcher';
 import { useCalculator } from './hooks/useCalculator';
 import { useCalculationHistory } from './hooks/useCalculationHistory';
 import { DEFAULT_CALCULATION_STATE } from './types/calculator';
@@ -17,6 +19,7 @@ const CURRENT_MODEL_STORAGE_KEY = 'current-model-info';
 const CURRENT_STATE_STORAGE_KEY = 'current-calculator-state';
 
 function App() {
+  const { t } = useTranslation();
 
   const [currentState, setCurrentState] = useState<CalculationState>(() => {
     try {
@@ -77,8 +80,8 @@ function App() {
       updateCalculation(editingId, currentState, result, note, modelName, modelLink);
       setEditingId(null);
         addToast({
-            title: "Розрахунок успішно оновлено!",
-            description: modelName || "Зміни збережено",
+            title: t('toast.updated'),
+            description: modelName || t('toast.updatedDescription'),
             color: "success",
             variant: "flat",
             timeout: 3000,
@@ -87,8 +90,8 @@ function App() {
       // Збереження нового розрахунку
       addCalculation(currentState, result, note, modelName, modelLink);
         addToast({
-            title: "Розрахунок успішно збережено!",
-            description: modelName || "Додано в історію",
+            title: t('toast.saved'),
+            description: modelName || t('toast.savedDescription'),
             color: "success",
             variant: "flat",
             timeout: 3000,
@@ -131,16 +134,25 @@ function App() {
       <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800 p-4 md:p-8">
         <div className="max-w-7xl mx-auto">
         {/* Header */}
-        <div className="mb-8 text-center">
+        <div className="mb-8">
+          <div className="flex justify-between items-center mb-4">
+            <div className="flex-1"></div>
+            <div className="flex-1 flex justify-center">
+              <Logo/>
+            </div>
+            <div className="flex-1 flex justify-end">
+              <LanguageSwitcher />
+            </div>
+          </div>
 
-            <Logo/>
-
-          <h1 className="text-4xl font-bold text-gray-800 dark:text-gray-100 mb-2">
-            Калькулятор вартості 3D-друку
-          </h1>
-          <p className="text-gray-600 dark:text-gray-400">
-            Професійний розрахунок собівартості та ціни для клієнта
-          </p>
+          <div className="text-center">
+            <h1 className="text-4xl font-bold text-gray-800 dark:text-gray-100 mb-2">
+              {t('header.title')}
+            </h1>
+            <p className="text-gray-600 dark:text-gray-400">
+              {t('header.subtitle')}
+            </p>
+          </div>
         </div>
 
         {/* Edit Mode Banner */}
@@ -150,14 +162,14 @@ function App() {
               <div className="flex justify-between items-center">
                 <div>
                   <p className="font-semibold text-blue-800 dark:text-blue-300">
-                    Режим редагування
+                    {t('editMode.title')}
                   </p>
                   <p className="text-small text-blue-600 dark:text-blue-400">
-                    Ви редагуєте існуючий розрахунок
+                    {t('editMode.subtitle')}
                   </p>
                 </div>
                 <Button color="default" variant="flat" onPress={handleCancelEdit}>
-                  Скасувати
+                  {t('editMode.cancel')}
                 </Button>
               </div>
             </CardBody>
@@ -171,7 +183,7 @@ function App() {
           size="lg"
           className="mb-6"
         >
-          <Tab key="calculator" title="Калькулятор">
+          <Tab key="calculator" title={t('tabs.calculator')}>
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
               {/* Форма */}
               <div className="lg:col-span-2">
@@ -187,14 +199,13 @@ function App() {
                 />
 
                 {/* Кнопки дій */}
-                <div className="flex gap-3 mt-6">
+                <div className="flex md:flex-row flex-col gap-3 mt-6">
                   <Button
                     color="primary"
                     size="lg"
-                    className="flex-1"
                     onPress={handleSaveCalculation}
                   >
-                    {editingId ? 'Оновити розрахунок' : 'Зберегти розрахунок'}
+                    {editingId ? t('buttons.update') : t('buttons.save')}
                   </Button>
                   {editingId ? (
                     <Button
@@ -203,7 +214,7 @@ function App() {
                       size="lg"
                       onPress={handleCancelEdit}
                     >
-                      Скасувати
+                      {t('buttons.cancel')}
                     </Button>
                   ) : (
                     <Button
@@ -212,7 +223,7 @@ function App() {
                       size="lg"
                       onPress={handleNewCalculation}
                     >
-                      Очистити форму
+                      {t('buttons.clear')}
                     </Button>
                   )}
                 </div>
@@ -227,43 +238,21 @@ function App() {
             </div>
           </Tab>
 
-          <Tab key="history" title={`Історія (${history.length})`}>
+          <Tab key="history" title={`${t('tabs.history')} (${history.length})`}>
             <CalculationHistory
               history={history}
               onDelete={deleteCalculation}
               onEdit={handleEditCalculation}
               onClearAll={() => {
-                toast.custom(
-                  (t) => (
-                    <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-4 border border-danger-200 dark:border-danger-800">
-                      <p className="font-semibold text-danger mb-2">Видалити всю історію?</p>
-                      <p className="text-small text-default-600 mb-4">
-                        Ви впевнені, що хочете видалити всю історію розрахунків? Цю дію не можна скасувати.
-                      </p>
-                      <div className="flex gap-2">
-                        <Button
-                          size="sm"
-                          color="danger"
-                          onPress={() => {
-                            clearHistory();
-                            toast.dismiss(t);
-                            toast.success('Історію очищено');
-                          }}
-                        >
-                          Видалити
-                        </Button>
-                        <Button
-                          size="sm"
-                          variant="flat"
-                          onPress={() => toast.dismiss(t)}
-                        >
-                          Скасувати
-                        </Button>
-                      </div>
-                    </div>
-                  ),
-                  { duration: Infinity }
-                );
+                if (confirm(`${t('history.confirmDelete.title')}\n\n${t('history.confirmDelete.message')}`)) {
+                  clearHistory();
+                  addToast({
+                    title: t('toast.historyCleared'),
+                    color: "success",
+                    variant: "flat",
+                    timeout: 3000,
+                  });
+                }
               }}
             />
           </Tab>
@@ -272,10 +261,10 @@ function App() {
         {/* Footer */}
         <div className="mt-8 text-center text-small text-gray-500 dark:text-gray-400">
           <p>
-            Професійний інструмент для розрахунку вартості 3D-друку з урахуванням усіх витрат
+            {t('footer.line1')}
           </p>
           <p className="mt-1">
-            Враховує матеріали, електрику, амортизацію, роботу та бізнес-ризики
+            {t('footer.line2')}
           </p>
         </div>
         </div>
