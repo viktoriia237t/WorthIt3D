@@ -20,8 +20,6 @@ import {
     Calendar,
     Layers,
     Clock,
-    Info,
-    ChevronRight
 } from "lucide-react";
 
 import type { CalculationHistory as CalculationHistoryType } from '../types/calculator';
@@ -287,7 +285,7 @@ export const CalculationHistory: React.FC<CalculationHistoryProps> = ({
     );
 };
 
-// Допоміжні мікро-компоненти для Modal
+
 const DetailBlock = ({ label, value, icon }: { label: string, value: string, icon: React.ReactNode }) => (
     <div className="flex flex-col gap-1 p-3 rounded-xl bg-default-50 border border-default-100">
         <span className="text-tiny text-default-400 flex items-center gap-1">{icon} {label}</span>
