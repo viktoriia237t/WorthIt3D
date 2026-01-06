@@ -66,12 +66,12 @@ export const CalculationResultComponent: React.FC<CalculationResultProps> = ({
                     />
                     <CostRow
                         icon={<Wrench size={16} />}
-                        label={t('result.depreciation')}
+                        label={t('result.nozzleWear')}
                         value={formatCurrency(result.nozzleWearCost)}
                     />
                     <CostRow
                         icon={<Wrench size={16} />}
-                        label={t('result.depreciation')}
+                        label={t('result.bedWear')}
                         value={formatCurrency(result.bedWearCost)}
                     />
                     <CostRow
