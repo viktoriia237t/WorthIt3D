@@ -20,6 +20,8 @@ import {
     Calendar,
     Layers,
     Clock,
+    Pin,
+    PinOff,
 } from "lucide-react";
 
 import type { CalculationHistory as CalculationHistoryType } from '../types/calculator';
@@ -28,6 +30,7 @@ interface CalculationHistoryProps {
     history: CalculationHistoryType[];
     onDelete: (id: string) => void;
     onEdit: (id: string) => void;
+    onTogglePin: (id: string) => void;
     onClearAll: () => void;
 }
 
@@ -35,10 +38,12 @@ export const CalculationHistory: React.FC<CalculationHistoryProps> = ({
                                                                           history,
                                                                           onDelete,
                                                                           onEdit,
+                                                                          onTogglePin,
                                                                           onClearAll,
                                                                       }) => {
     const { t } = useTranslation();
     const { isOpen, onOpen, onOpenChange } = useDisclosure();
+    const { isOpen: isDeleteAllOpen, onOpen: onDeleteAllOpen, onOpenChange: onDeleteAllOpenChange } = useDisclosure();
     const [selectedItem, setSelectedItem] = useState<CalculationHistoryType | null>(null);
 
     const formatDate = (timestamp: number) => {
@@ -53,6 +58,10 @@ export const CalculationHistory: React.FC<CalculationHistoryProps> = ({
 
     const formatCurrency = (value: number) => {
         const currencySymbol = t('units.currencySymbol');
+        // Handle null, undefined, NaN, Infinity, and invalid numbers
+        if (value == null || !isFinite(value) || isNaN(value)) {
+            return `0.00 ${currencySymbol}`;
+        }
         return `${value.toFixed(2)} ${currencySymbol}`;
     };
 
@@ -99,7 +108,7 @@ export const CalculationHistory: React.FC<CalculationHistoryProps> = ({
                         variant="light"
                         size="sm"
                         startContent={<Trash2 size={16} />}
-                        onPress={onClearAll}
+                        onPress={onDeleteAllOpen}
                     >
                         {t('buttons.clearAll')}
                     </Button>
@@ -167,6 +176,15 @@ export const CalculationHistory: React.FC<CalculationHistoryProps> = ({
                                         </TableCell>
                                         <TableCell>
                                             <div className="relative flex items-center justify-center gap-2">
+                                                <Tooltip content={item.pinned ? "Відкріпити" : "Закріпити"}>
+                                                    <Button isIconOnly size="sm" variant="light" onPress={() => onTogglePin(item.id)}>
+                                                        {item.pinned ? (
+                                                            <Pin size={18} className="text-warning fill-warning" />
+                                                        ) : (
+                                                            <PinOff size={18} className="text-default-400" />
+                                                        )}
+                                                    </Button>
+                                                </Tooltip>
                                                 <Tooltip content={t('history.tooltips.details')}>
                                                     <Button isIconOnly size="sm" variant="light" onPress={() => handleViewDetails(item)}>
                                                         <Eye size={18} className="text-default-500" />
@@ -281,6 +299,38 @@ export const CalculationHistory: React.FC<CalculationHistoryProps> = ({
                     )}
                 </ModalContent>
             </Modal>
+
+            {/* Delete All Confirmation Modal */}
+            <Modal
+                isOpen={isDeleteAllOpen}
+                onOpenChange={onDeleteAllOpenChange}
+                size="md"
+                backdrop="blur"
+            >
+                <ModalContent>
+                    {(onClose) => (
+                        <>
+                            <ModalHeader className="flex flex-col gap-1">
+                                <span className="text-danger font-bold">{t('history.confirmDelete.title')}</span>
+                            </ModalHeader>
+                            <ModalBody>
+                                <p className="text-default-600">{t('history.confirmDelete.message')}</p>
+                            </ModalBody>
+                            <ModalFooter>
+                                <Button color="default" variant="flat" onPress={onClose}>
+                                    {t('buttons.cancel')}
+                                </Button>
+                                <Button color="danger" onPress={() => {
+                                    onClearAll();
+                                    onClose();
+                                }}>
+                                    {t('buttons.delete')}
+                                </Button>
+                            </ModalFooter>
+                        </>
+                    )}
+                </ModalContent>
+            </Modal>
         </>
     );
 };
@@ -293,9 +343,12 @@ const DetailBlock = ({ label, value, icon }: { label: string, value: string, ico
     </div>
 );
 
-const FinanceRow = ({ label, value, t }: { label: string, value: number, t: any }) => (
-    <div className="flex justify-between items-center px-1">
-        <span className="text-small text-default-500">{label}</span>
-        <span className="text-small font-mono font-medium">{value.toFixed(2)} {t('units.uah')}</span>
-    </div>
-);
+const FinanceRow = ({ label, value, t }: { label: string, value: number, t: any }) => {
+    const formattedValue = (value == null || !isFinite(value) || isNaN(value)) ? '0.00' : value.toFixed(2);
+    return (
+        <div className="flex justify-between items-center px-1">
+            <span className="text-small text-default-500">{label}</span>
+            <span className="text-small font-mono font-medium">{formattedValue} {t('units.uah')}</span>
+        </div>
+    );
+};

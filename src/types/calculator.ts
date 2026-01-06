@@ -76,39 +76,40 @@ export interface CalculationHistory {
   note?: string;
   modelName?: string;
   modelLink?: string;
+  pinned?: boolean;
 }
 
 export const DEFAULT_CALCULATION_STATE: CalculationState = {
   // Матеріали
-  weight: 150,
-  spoolPrice: 800,
-  spoolWeight: 1000,
+  weight: 0,
+  spoolPrice: 0,
+  spoolWeight: 0,
 
   // Час
-  printTime: 10,
-  prepTime: 0.2,
-  postTime: 0.5,
+  printTime: 0,
+  prepTime: 0,
+  postTime: 0,
 
   // Електроенергія
-  powerConsumption: 0.12,
-  electricityTariff: 4.32,
+  powerConsumption: 0,
+  electricityTariff: 0,
 
   // Амортизація
-  printerPrice: 15000,
-  lifespan: 5000,
+  printerPrice: 0,
+  lifespan: 0,
 
   // Витратні частини
-  nozzlePrice: 150, // Середня ціна сопла
-  nozzleLifespan: 500, // Ресурс сопла (години)
-  bedPrice: 500, // Вартість столу/покриття
-  bedLifespan: 1000, // Ресурс столу (години)
+  nozzlePrice: 0, // Середня ціна сопла
+  nozzleLifespan: 0, // Ресурс сопла (години)
+  bedPrice: 0, // Вартість столу/покриття
+  bedLifespan: 0, // Ресурс столу (години)
 
   // Робота
-  hourlyRate: 200,
+  hourlyRate: 0,
 
   // Бізнес
-  failureRate: 1.1,
-  markup: 1.5,
+  failureRate: 1,
+  markup: 1,
 
   // Додаткові витрати
   consumables: 0,

@@ -29,6 +29,10 @@
     "updatedDescription": "Changes saved",
     "historyCleared": "History cleared"
   },
+  "autoSave": {
+    "lastSaved": "Auto-saved",
+    "saving": "Saving..."
+  },
   "history": {
     "title": "Calculation History",
     "empty": "Calculation history is empty",

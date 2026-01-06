@@ -8,7 +8,9 @@ export const useCalculationHistory = () => {
     try {
       const stored = localStorage.getItem(STORAGE_KEY);
       if (stored) {
-        return JSON.parse(stored);
+        const parsed = JSON.parse(stored);
+        // Sort by timestamp descending (newest first)
+        return parsed.sort((a: CalculationHistory, b: CalculationHistory) => b.timestamp - a.timestamp);
       }
     } catch (error) {
       console.error('Failed to load calculation history:', error);
@@ -52,20 +54,37 @@ export const useCalculationHistory = () => {
   // Оновлення розрахунку
   const updateCalculation = useCallback(
     (id: string, state: CalculationState, result: CalculationResult, note?: string, modelName?: string, modelLink?: string) => {
-      setHistory((prev) =>
-        prev.map((item) =>
+      setHistory((prev) => {
+        const updated = prev.map((item) =>
           item.id === id
             ? { ...item, state, result, note, modelName, modelLink, timestamp: Date.now() }
             : item
-        )
-      );
+        );
+        // Sort by timestamp descending (newest first)
+        return updated.sort((a, b) => b.timestamp - a.timestamp);
+      });
     },
     []
   );
 
-  // Очищення всієї історії
+  // Очищення всієї історії (крім закріплених)
   const clearHistory = useCallback(() => {
-    setHistory([]);
+    setHistory((prev) => prev.filter((item) => item.pinned));
+  }, []);
+
+  // Перемикання статусу закріплення
+  const togglePin = useCallback((id: string) => {
+    setHistory((prev) => {
+      const updated = prev.map((item) =>
+        item.id === id ? { ...item, pinned: !item.pinned } : item
+      );
+      // Sort: pinned items first, then by timestamp
+      return updated.sort((a, b) => {
+        if (a.pinned && !b.pinned) return -1;
+        if (!a.pinned && b.pinned) return 1;
+        return b.timestamp - a.timestamp;
+      });
+    });
   }, []);
 
   // Отримання розрахунку за ID
@@ -76,6 +95,48 @@ export const useCalculationHistory = () => {
     [history]
   );
 
+  // Upsert: оновити існуючий або створити новий розрахунок
+  const upsertCalculation = useCallback(
+    (id: string | null, state: CalculationState, result: CalculationResult, note?: string, modelName?: string, modelLink?: string): string => {
+      // Generate ID before setHistory if needed
+      const savedId = id || `calc-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`;
+
+      setHistory((prev) => {
+        let updated;
+        if (id) {
+          // Спробувати оновити існуючий запис
+          const exists = prev.some((calc) => calc.id === id);
+          if (exists) {
+            // Оновити існуючий
+            updated = prev.map((calc) =>
+              calc.id === id
+                ? { ...calc, state, result, note, modelName, modelLink, timestamp: Date.now() }
+                : calc
+            );
+            // Sort by timestamp descending (newest first)
+            return updated.sort((a, b) => b.timestamp - a.timestamp);
+          }
+        }
+
+        // Створити новий запис
+        const newCalculation: CalculationHistory = {
+          id: savedId,
+          timestamp: Date.now(),
+          state,
+          result,
+          note,
+          modelName,
+          modelLink,
+        };
+        // New items are already at the top, but sort to be safe
+        return [newCalculation, ...prev];
+      });
+
+      return savedId;
+    },
+    []
+  );
+
   return {
     history,
     addCalculation,
@@ -83,5 +144,7 @@ export const useCalculationHistory = () => {
     updateCalculation,
     clearHistory,
     getCalculation,
+    upsertCalculation,
+    togglePin,
   };
 };

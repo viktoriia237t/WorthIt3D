@@ -19,6 +19,10 @@ export const CalculationResultComponent: React.FC<CalculationResultProps> = ({
     // Форматування валюти за стандартом
     const formatCurrency = (value: number) => {
         const currencySymbol = t('units.currencySymbol');
+        // Handle null, undefined, NaN, Infinity, and invalid numbers
+        if (value == null || !isFinite(value) || isNaN(value)) {
+            return `0.00 ${currencySymbol}`;
+        }
         return `${value.toFixed(2)} ${currencySymbol}`;
     };
 

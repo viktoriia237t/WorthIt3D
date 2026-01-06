@@ -1,16 +1,21 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import {Card, CardBody, } from "@heroui/card";
-import { Button} from "@heroui/button";
+import { Button, ButtonGroup } from "@heroui/button";
 import { Tabs, Tab } from "@heroui/tabs";
+import { Tooltip } from "@heroui/tooltip";
+import { Badge } from "@heroui/badge";
+import { Save, SaveAll, Eraser } from "lucide-react";
 import { ToastProvider, addToast } from "@heroui/toast";
 import { CalculatorForm } from './components/CalculatorForm';
 import { CalculationResultComponent } from './components/CalculationResult';
 import { CalculationHistory } from './components/CalculationHistory';
 import { LanguageSwitcher } from './components/LanguageSwitcher';
+import { GitHubLink } from './components/GitHubLink';
 import { useCalculator } from './hooks/useCalculator';
 import { useCalculationHistory } from './hooks/useCalculationHistory';
 import { useSeoMeta } from './hooks/useSeoMeta';
+import { useDebouncedEffect } from './hooks/useDebouncedEffect';
 import { DEFAULT_CALCULATION_STATE } from './types/calculator';
 import type { CalculationState } from './types/calculator';
 import Logo from '../src/components/Logo';
@@ -18,6 +23,7 @@ import Logo from '../src/components/Logo';
 
 const CURRENT_MODEL_STORAGE_KEY = 'current-model-info';
 const CURRENT_STATE_STORAGE_KEY = 'current-calculator-state';
+const EDITING_ID_STORAGE_KEY = 'current-editing-id';
 
 function App() {
   const { t, i18n } = useTranslation();
@@ -45,8 +51,22 @@ function App() {
   const [modelName, setModelName] = useState('');
   const [modelLink, setModelLink] = useState('');
   const [note, setNote] = useState('');
-  const [editingId, setEditingId] = useState<string | null>(null);
+  const [editingId, setEditingId] = useState<string | null>(() => {
+    try {
+      return localStorage.getItem(EDITING_ID_STORAGE_KEY);
+    } catch (error) {
+      console.error('Failed to load editing ID:', error);
+      return null;
+    }
+  });
   const [activeTab, setActiveTab] = useState<string>('calculator');
+
+  // Auto-save state
+  const [autoSaveId, setAutoSaveId] = useState<string | null>(null);
+  const [lastSaveTime, setLastSaveTime] = useState<number | null>(null);
+  const [isSaving, setIsSaving] = useState(false);
+  const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
+  const isInitialMount = useRef(true);
 
   // Завантаження назви та посилання моделі з localStorage при монтуванні
   useEffect(() => {
@@ -80,33 +100,123 @@ function App() {
     }
   }, [currentState]);
 
+  // Збереження editingId в localStorage при зміні
+  useEffect(() => {
+    try {
+      if (editingId) {
+        localStorage.setItem(EDITING_ID_STORAGE_KEY, editingId);
+      } else {
+        localStorage.removeItem(EDITING_ID_STORAGE_KEY);
+      }
+    } catch (error) {
+      console.error('Failed to save editing ID:', error);
+    }
+  }, [editingId]);
+
   const result = useCalculator(currentState);
-  const { history, addCalculation, deleteCalculation, updateCalculation, clearHistory, getCalculation } = useCalculationHistory();
+  const { history, addCalculation, deleteCalculation, updateCalculation, clearHistory, getCalculation, upsertCalculation, togglePin } = useCalculationHistory();
+
+  // Track unsaved changes
+  useEffect(() => {
+    // Check if form is not empty
+    const isEmptyForm = JSON.stringify(currentState) === JSON.stringify(DEFAULT_CALCULATION_STATE);
+    const hasContent = !isEmptyForm || modelName || modelLink || note;
+
+    // If we just saved (lastSaveTime exists), mark as saved
+    if (lastSaveTime && !isSaving) {
+      setHasUnsavedChanges(false);
+      return;
+    }
+
+    setHasUnsavedChanges(hasContent);
+  }, [currentState, modelName, modelLink, note, isSaving, lastSaveTime]);
+
+  // Auto-save calculator state to history (debounced)
+  useDebouncedEffect(
+    () => {
+      // Skip auto-save on initial mount
+      if (isInitialMount.current) {
+        isInitialMount.current = false;
+        return;
+      }
+
+      // Don't auto-save if form is empty (all defaults) and no model info
+      const isEmptyForm = JSON.stringify(currentState) === JSON.stringify(DEFAULT_CALCULATION_STATE);
+      if (isEmptyForm && !modelName && !modelLink && !note) {
+        return;
+      }
+
+      // Don't auto-save if already saving
+      if (isSaving) {
+        return;
+      }
+
+      // Perform auto-save
+      setIsSaving(true);
+      try {
+        const targetId = editingId || autoSaveId;
+        const savedId = upsertCalculation(
+          targetId,
+          currentState,
+          result,
+          note,
+          modelName,
+          modelLink
+        );
+
+        // Store the auto-save ID for future updates
+        if (!editingId) {
+          setAutoSaveId(savedId);
+        }
+
+        setLastSaveTime(Date.now());
+      } catch (error) {
+        console.error('Auto-save failed:', error);
+      } finally {
+        setIsSaving(false);
+      }
+    },
+    2000, // 2 second debounce delay
+    [currentState, modelName, modelLink, note, result, editingId, isSaving, upsertCalculation]
+  );
 
   const handleSaveCalculation = () => {
     if (editingId) {
-      // Оновлення існуючого розрахунку
+      // Update existing entry (from edit mode)
       updateCalculation(editingId, currentState, result, note, modelName, modelLink);
       setEditingId(null);
-        addToast({
-            title: t('toast.updated'),
-            description: modelName || t('toast.updatedDescription'),
-            color: "success",
-            variant: "flat",
-            timeout: 3000,
-        });
+      setAutoSaveId(null); // Clear auto-save ID
+      addToast({
+        title: t('toast.updated'),
+        description: modelName || t('toast.updatedDescription'),
+        color: "success",
+        variant: "flat",
+        timeout: 3000,
+      });
+    } else if (autoSaveId) {
+      // User clicked "Save" on an auto-saved draft - finalize it
+      updateCalculation(autoSaveId, currentState, result, note, modelName, modelLink);
+      setAutoSaveId(null);
+      addToast({
+        title: t('toast.saved'),
+        description: modelName || t('toast.savedDescription'),
+        color: "success",
+        variant: "flat",
+        timeout: 3000,
+      });
     } else {
-      // Збереження нового розрахунку
+      // Create new entry (no auto-save draft exists)
       addCalculation(currentState, result, note, modelName, modelLink);
-        addToast({
-            title: t('toast.saved'),
-            description: modelName || t('toast.savedDescription'),
-            color: "success",
-            variant: "flat",
-            timeout: 3000,
-        });
+      addToast({
+        title: t('toast.saved'),
+        description: modelName || t('toast.savedDescription'),
+        color: "success",
+        variant: "flat",
+        timeout: 3000,
+      });
     }
     setNote('');
+    setLastSaveTime(Date.now());
   };
 
   const handleEditCalculation = (id: string) => {
@@ -127,6 +237,7 @@ function App() {
     setModelName('');
     setModelLink('');
     setEditingId(null);
+    setAutoSaveId(null); // Clear auto-save ID when canceling
   };
 
   const handleNewCalculation = () => {
@@ -135,6 +246,7 @@ function App() {
     setModelName('');
     setModelLink('');
     setEditingId(null);
+    setAutoSaveId(null); // Clear auto-save ID when starting new calculation
   };
 
   return (
@@ -149,7 +261,8 @@ function App() {
             <div className="flex-1 flex justify-center">
               <Logo/>
             </div>
-            <div className="flex-1 flex justify-end">
+            <div className="flex-1 flex justify-end items-center gap-2">
+              <GitHubLink />
               <LanguageSwitcher />
             </div>
           </nav>
@@ -190,94 +303,104 @@ function App() {
           </Card>
         )}
 
-        {/* Tabs */}
+        {/* Tabs and Actions */}
         <main role="main">
-          <Tabs
-            selectedKey={activeTab}
-            onSelectionChange={(key) => setActiveTab(key as string)}
-            size="lg"
-            className="mb-6"
-            aria-label="Calculator sections"
-          >
-            <Tab key="calculator" title={t('tabs.calculator')}>
-              <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                {/* Форма */}
-                <section className="lg:col-span-2" aria-label="Calculator form">
-                  <CalculatorForm
-                    initialState={currentState}
-                    onStateChange={setCurrentState}
-                    modelName={modelName}
-                    onModelNameChange={setModelName}
-                    modelLink={modelLink}
-                    onModelLinkChange={setModelLink}
-                    note={note}
-                    onNoteChange={setNote}
-                  />
+          {/* Tab Switcher and Action Buttons */}
+          <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 mb-6">
+            <Tabs
+              selectedKey={activeTab}
+              onSelectionChange={(key) => setActiveTab(key as string)}
+              size="lg"
+              aria-label="Calculator sections"
+              disableAnimation
+            >
+              <Tab key="calculator" title={t('tabs.calculator')} />
+              <Tab key="history" title={`${t('tabs.history')} (${history.length})`} />
+            </Tabs>
 
-                  {/* Кнопки дій */}
-                  <div className="flex md:flex-row flex-col gap-3 mt-6" role="group" aria-label="Action buttons">
+            {/* Action Buttons */}
+            {activeTab === 'calculator' && (
+              <ButtonGroup>
+                <Tooltip content={editingId ? t('buttons.update') : t('buttons.save')}>
+                  <Badge
+                    content=""
+                    color={lastSaveTime && !hasUnsavedChanges ? "success" : "warning"}
+                    placement="top-right"
+                    shape="circle"
+                    isDot
+                    isInvisible={!lastSaveTime && !hasUnsavedChanges}
+                  >
                     <Button
-                      color="primary"
-                      size="lg"
+                      color="default"
+                      variant="flat"
+                      isIconOnly
                       onPress={handleSaveCalculation}
                       aria-label={editingId ? t('buttons.update') : t('buttons.save')}
                     >
-                      {editingId ? t('buttons.update') : t('buttons.save')}
+                      {editingId || autoSaveId ? <SaveAll size={18} /> : <Save size={18} />}
                     </Button>
-                    {editingId ? (
-                      <Button
-                        color="default"
-                        variant="flat"
-                        size="lg"
-                        onPress={handleCancelEdit}
-                        aria-label={t('buttons.cancel')}
-                      >
-                        {t('buttons.cancel')}
-                      </Button>
-                    ) : (
-                      <Button
-                        color="default"
-                        variant="flat"
-                        size="lg"
-                        onPress={handleNewCalculation}
-                        aria-label={t('buttons.clear')}
-                      >
-                        {t('buttons.clear')}
-                      </Button>
-                    )}
-                  </div>
-                </section>
+                  </Badge>
+                </Tooltip>
+                <Tooltip content={t('buttons.clear')}>
+                  <Button
+                    color="default"
+                    variant="flat"
+                    isIconOnly
+                    onPress={handleNewCalculation}
+                    aria-label={t('buttons.clear')}
+                  >
+                    <Eraser size={18} />
+                  </Button>
+                </Tooltip>
+              </ButtonGroup>
+            )}
+          </div>
 
-                {/* Результат */}
-                <aside className="lg:col-span-1" aria-label="Calculation results">
-                  <div className="sticky top-4">
-                    <CalculationResultComponent result={result} />
-                  </div>
-                </aside>
-              </div>
-            </Tab>
-
-            <Tab key="history" title={`${t('tabs.history')} (${history.length})`}>
-              <section aria-label="Calculation history">
-                <CalculationHistory
-                  history={history}
-                  onDelete={deleteCalculation}
-                  onEdit={handleEditCalculation}
-                  onClearAll={() => {
-                    if (confirm(`${t('history.confirmDelete.title')}\n\n${t('history.confirmDelete.message')}`)) {
-                      clearHistory();
-                      addToast({
-                        title: t('toast.historyCleared'),
-                        color: "success",
-                        variant: "flat",
-                        timeout: 3000,
-                      });
-                    }
-                  }}
+          {/* Tab Content */}
+          {activeTab === 'calculator' && (
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+              {/* Форма */}
+              <section className="lg:col-span-2" aria-label="Calculator form">
+                <CalculatorForm
+                  initialState={currentState}
+                  onStateChange={setCurrentState}
+                  modelName={modelName}
+                  onModelNameChange={setModelName}
+                  modelLink={modelLink}
+                  onModelLinkChange={setModelLink}
+                  note={note}
+                  onNoteChange={setNote}
                 />
               </section>
-            </Tab>
-          </Tabs>
+
+              {/* Результат */}
+              <aside className="lg:col-span-1" aria-label="Calculation results">
+                <div className="sticky top-4">
+                  <CalculationResultComponent result={result} />
+                </div>
+              </aside>
+            </div>
+          )}
+
+          {activeTab === 'history' && (
+            <section aria-label="Calculation history">
+              <CalculationHistory
+                history={history}
+                onDelete={deleteCalculation}
+                onEdit={handleEditCalculation}
+                onTogglePin={togglePin}
+                onClearAll={() => {
+                  clearHistory();
+                  addToast({
+                    title: t('toast.historyCleared'),
+                    color: "success",
+                    variant: "flat",
+                    timeout: 3000,
+                  });
+                }}
+              />
+            </section>
+          )}
         </main>
 
         {/* Footer */}
