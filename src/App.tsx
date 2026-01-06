@@ -10,6 +10,7 @@ import { CalculationHistory } from './components/CalculationHistory';
 import { LanguageSwitcher } from './components/LanguageSwitcher';
 import { useCalculator } from './hooks/useCalculator';
 import { useCalculationHistory } from './hooks/useCalculationHistory';
+import { useSeoMeta } from './hooks/useSeoMeta';
 import { DEFAULT_CALCULATION_STATE } from './types/calculator';
 import type { CalculationState } from './types/calculator';
 import Logo from '../src/components/Logo';
@@ -19,7 +20,15 @@ const CURRENT_MODEL_STORAGE_KEY = 'current-model-info';
 const CURRENT_STATE_STORAGE_KEY = 'current-calculator-state';
 
 function App() {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+
+  // Update HTML lang attribute when language changes
+  useEffect(() => {
+    document.documentElement.lang = i18n.language;
+  }, [i18n.language]);
+
+  // Update SEO meta tags when language changes
+  useSeoMeta();
 
   const [currentState, setCurrentState] = useState<CalculationState>(() => {
     try {
@@ -134,8 +143,8 @@ function App() {
       <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800 p-4 md:p-8">
         <div className="max-w-7xl mx-auto">
         {/* Header */}
-        <div className="mb-8">
-          <div className="flex justify-between items-center mb-4">
+        <header className="mb-8" role="banner">
+          <nav className="flex justify-between items-center mb-4" aria-label="Main navigation">
             <div className="flex-1"></div>
             <div className="flex-1 flex justify-center">
               <Logo/>
@@ -143,7 +152,7 @@ function App() {
             <div className="flex-1 flex justify-end">
               <LanguageSwitcher />
             </div>
-          </div>
+          </nav>
 
           <div className="text-center">
             <h1 className="text-4xl font-bold text-gray-800 dark:text-gray-100 mb-2">
@@ -153,11 +162,11 @@ function App() {
               {t('header.subtitle')}
             </p>
           </div>
-        </div>
+        </header>
 
         {/* Edit Mode Banner */}
         {editingId && (
-          <Card className="mb-4 bg-blue-50 dark:bg-blue-900/20">
+          <Card className="mb-4 bg-blue-50 dark:bg-blue-900/20" role="alert" aria-live="polite">
             <CardBody>
               <div className="flex justify-between items-center">
                 <div>
@@ -168,7 +177,12 @@ function App() {
                     {t('editMode.subtitle')}
                   </p>
                 </div>
-                <Button color="default" variant="flat" onPress={handleCancelEdit}>
+                <Button
+                  color="default"
+                  variant="flat"
+                  onPress={handleCancelEdit}
+                  aria-label={t('editMode.cancel')}
+                >
                   {t('editMode.cancel')}
                 </Button>
               </div>
@@ -177,96 +191,104 @@ function App() {
         )}
 
         {/* Tabs */}
-        <Tabs
-          selectedKey={activeTab}
-          onSelectionChange={(key) => setActiveTab(key as string)}
-          size="lg"
-          className="mb-6"
-        >
-          <Tab key="calculator" title={t('tabs.calculator')}>
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-              {/* Форма */}
-              <div className="lg:col-span-2">
-                <CalculatorForm
-                  initialState={currentState}
-                  onStateChange={setCurrentState}
-                  modelName={modelName}
-                  onModelNameChange={setModelName}
-                  modelLink={modelLink}
-                  onModelLinkChange={setModelLink}
-                  note={note}
-                  onNoteChange={setNote}
+        <main role="main">
+          <Tabs
+            selectedKey={activeTab}
+            onSelectionChange={(key) => setActiveTab(key as string)}
+            size="lg"
+            className="mb-6"
+            aria-label="Calculator sections"
+          >
+            <Tab key="calculator" title={t('tabs.calculator')}>
+              <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                {/* Форма */}
+                <section className="lg:col-span-2" aria-label="Calculator form">
+                  <CalculatorForm
+                    initialState={currentState}
+                    onStateChange={setCurrentState}
+                    modelName={modelName}
+                    onModelNameChange={setModelName}
+                    modelLink={modelLink}
+                    onModelLinkChange={setModelLink}
+                    note={note}
+                    onNoteChange={setNote}
+                  />
+
+                  {/* Кнопки дій */}
+                  <div className="flex md:flex-row flex-col gap-3 mt-6" role="group" aria-label="Action buttons">
+                    <Button
+                      color="primary"
+                      size="lg"
+                      onPress={handleSaveCalculation}
+                      aria-label={editingId ? t('buttons.update') : t('buttons.save')}
+                    >
+                      {editingId ? t('buttons.update') : t('buttons.save')}
+                    </Button>
+                    {editingId ? (
+                      <Button
+                        color="default"
+                        variant="flat"
+                        size="lg"
+                        onPress={handleCancelEdit}
+                        aria-label={t('buttons.cancel')}
+                      >
+                        {t('buttons.cancel')}
+                      </Button>
+                    ) : (
+                      <Button
+                        color="default"
+                        variant="flat"
+                        size="lg"
+                        onPress={handleNewCalculation}
+                        aria-label={t('buttons.clear')}
+                      >
+                        {t('buttons.clear')}
+                      </Button>
+                    )}
+                  </div>
+                </section>
+
+                {/* Результат */}
+                <aside className="lg:col-span-1" aria-label="Calculation results">
+                  <div className="sticky top-4">
+                    <CalculationResultComponent result={result} />
+                  </div>
+                </aside>
+              </div>
+            </Tab>
+
+            <Tab key="history" title={`${t('tabs.history')} (${history.length})`}>
+              <section aria-label="Calculation history">
+                <CalculationHistory
+                  history={history}
+                  onDelete={deleteCalculation}
+                  onEdit={handleEditCalculation}
+                  onClearAll={() => {
+                    if (confirm(`${t('history.confirmDelete.title')}\n\n${t('history.confirmDelete.message')}`)) {
+                      clearHistory();
+                      addToast({
+                        title: t('toast.historyCleared'),
+                        color: "success",
+                        variant: "flat",
+                        timeout: 3000,
+                      });
+                    }
+                  }}
                 />
-
-                {/* Кнопки дій */}
-                <div className="flex md:flex-row flex-col gap-3 mt-6">
-                  <Button
-                    color="primary"
-                    size="lg"
-                    onPress={handleSaveCalculation}
-                  >
-                    {editingId ? t('buttons.update') : t('buttons.save')}
-                  </Button>
-                  {editingId ? (
-                    <Button
-                      color="default"
-                      variant="flat"
-                      size="lg"
-                      onPress={handleCancelEdit}
-                    >
-                      {t('buttons.cancel')}
-                    </Button>
-                  ) : (
-                    <Button
-                      color="default"
-                      variant="flat"
-                      size="lg"
-                      onPress={handleNewCalculation}
-                    >
-                      {t('buttons.clear')}
-                    </Button>
-                  )}
-                </div>
-              </div>
-
-              {/* Результат */}
-              <div className="lg:col-span-1">
-                <div className="sticky top-4">
-                  <CalculationResultComponent result={result} />
-                </div>
-              </div>
-            </div>
-          </Tab>
-
-          <Tab key="history" title={`${t('tabs.history')} (${history.length})`}>
-            <CalculationHistory
-              history={history}
-              onDelete={deleteCalculation}
-              onEdit={handleEditCalculation}
-              onClearAll={() => {
-                if (confirm(`${t('history.confirmDelete.title')}\n\n${t('history.confirmDelete.message')}`)) {
-                  clearHistory();
-                  addToast({
-                    title: t('toast.historyCleared'),
-                    color: "success",
-                    variant: "flat",
-                    timeout: 3000,
-                  });
-                }
-              }}
-            />
-          </Tab>
-        </Tabs>
+              </section>
+            </Tab>
+          </Tabs>
+        </main>
 
         {/* Footer */}
-        <div className="mt-8 text-center text-small text-gray-500 dark:text-gray-400">
+        <footer className="mt-8 text-center text-small text-gray-500 dark:text-gray-400" role="contentinfo">
           <p>
             {t('footer.line1')}
           </p>
           <p className="mt-1">
             {t('footer.line2')}
           </p>
-        </div>
+        </footer>
         </div>
       </div>
     </>

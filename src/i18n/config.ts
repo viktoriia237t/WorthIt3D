@@ -5,8 +5,19 @@ import en from './locales/en.json';
 
 const LANGUAGE_KEY = 'app-language';
 
-// Get saved language or default to Ukrainian
-const savedLanguage = localStorage.getItem(LANGUAGE_KEY) || 'uk';
+// Get language from URL parameter, localStorage, or default to Ukrainian
+const getInitialLanguage = (): string => {
+  const urlParams = new URLSearchParams(window.location.search);
+  const urlLang = urlParams.get('lang');
+
+  if (urlLang && ['en', 'uk'].includes(urlLang)) {
+    return urlLang;
+  }
+
+  return localStorage.getItem(LANGUAGE_KEY) || 'uk';
+};
+
+const savedLanguage = getInitialLanguage();
 
 i18n
   .use(initReactI18next)
@@ -22,9 +33,14 @@ i18n
     },
   });
 
-// Save language preference when it changes
+// Save language preference and update URL when it changes
 i18n.on('languageChanged', (lng) => {
   localStorage.setItem(LANGUAGE_KEY, lng);
+
+  // Update URL parameter
+  const url = new URL(window.location.href);
+  url.searchParams.set('lang', lng);
+  window.history.replaceState({}, '', url.toString());
 });
 
 export default i18n;
