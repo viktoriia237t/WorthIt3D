@@ -2,7 +2,7 @@ name: Deploy WorthIt3D
 
 on:
   push:
-    branches: [ main ] # або master
+    branches: [ master ]
 
 permissions:
   contents: read
