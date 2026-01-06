@@ -148,6 +148,11 @@
     "line1": "Professional tool for calculating 3D printing costs with all expenses included",
     "line2": "Includes materials, electricity, depreciation, labor, and business risks"
   },
+  "seo": {
+    "title": "WorthIt3D - Free 3D Printing Cost Calculator | Calculate Print Costs",
+    "description": "Calculate your 3D printing costs accurately with WorthIt3D. Free online calculator for filament, resin, and printer costs. Support for multiple materials and currencies.",
+    "keywords": "3D printing calculator, 3D print cost calculator, filament calculator, resin calculator, 3D printing cost, printing estimate, WorthIt3D"
+  },
   "units": {
     "grams": "g",
     "hours": "hrs",
