@@ -404,17 +404,17 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({
                             variant="flat"
                             label={t('form.business.markup')}
                             labelPlacement="outside"
-                            placeholder="1.5"
+                            placeholder="100"
                             value={state.markup.toString()}
                             onChange={(e) => handleChange('markup', parseFloat(e.target.value) || 0)}
-                            min={1}
+                            min={0}
                         />
                         <Input
                             type="number"
                             variant="flat"
                             label={t('form.business.failureRate')}
                             labelPlacement="outside"
-                            placeholder="1.1"
+                            placeholder="1"
                             value={state.failureRate.toString()}
                             onChange={(e) => handleChange('failureRate', parseFloat(e.target.value) || 0)}
                             min={1}

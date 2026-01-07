@@ -9,10 +9,12 @@ import type { CalculationResult } from '../types/calculator';
 
 interface CalculationResultProps {
     result: CalculationResult;
+    weight: number; // Weight in grams for per-gram calculations
 }
 
 export const CalculationResultComponent: React.FC<CalculationResultProps> = ({
                                                                                  result,
+                                                                                 weight,
                                                                              }) => {
     const { t, i18n } = useTranslation();
 
@@ -25,6 +27,10 @@ export const CalculationResultComponent: React.FC<CalculationResultProps> = ({
         }
         return `${value.toFixed(2)} ${currencySymbol}`;
     };
+
+    // Calculate cost per gram
+    const costPerGram = weight > 0 ? result.totalCost / weight : 0;
+    const pricePerGram = weight > 0 ? result.finalPrice / weight : 0;
 
     return (
         <Card
@@ -117,24 +123,44 @@ export const CalculationResultComponent: React.FC<CalculationResultProps> = ({
                 {/* Секція фінальних показників */}
                 <div className="flex flex-col gap-4">
                     {/* Собівартість з браком */}
-                    <div className="flex justify-between items-center p-4 rounded-2xl bg-warning-50 dark:bg-warning-900/20 border-1 border-warning-100 dark:border-warning-800/30">
-                        <div className="flex flex-col">
-                            <span className="text-warning-700 dark:text-warning-400 font-bold">{t('result.totalCost')}</span>
-                            <span className="text-[10px] text-warning-600/70 uppercase font-bold">{t('result.failureRate')}</span>
+                    <div className="flex flex-col p-4 rounded-2xl bg-warning-50 dark:bg-warning-900/20 border-1 border-warning-100 dark:border-warning-800/30 gap-2">
+                        <div className="flex justify-between items-center">
+                            <div className="flex flex-col">
+                                <span className="text-warning-700 dark:text-warning-400 font-bold">{t('result.totalCost')}</span>
+                                <span className="text-[10px] text-warning-600/70 uppercase font-bold">{t('result.failureRate')}</span>
+                            </div>
+                            <span className="text-xl font-bold text-warning-700 dark:text-warning-400">
+                  {formatCurrency(result.totalCost)}
+                </span>
                         </div>
-                        <span className="text-xl font-bold text-warning-700 dark:text-warning-400">
-              {formatCurrency(result.totalCost)}
-            </span>
+                        {weight > 0 && (
+                            <div className="flex justify-between items-center pt-2 border-t border-warning-200/50 dark:border-warning-700/30">
+                                <span className="text-[11px] text-warning-600/80 dark:text-warning-400/80 font-medium">{t('result.perGram')}</span>
+                                <span className="text-sm font-semibold text-warning-700 dark:text-warning-400">
+                    {formatCurrency(costPerGram)}/{t('units.gram')}
+                  </span>
+                            </div>
+                        )}
                     </div>
 
                     {/* ГОЛОВНА ЦІНА */}
                     <div className="relative p-5 rounded-2xl bg-primary text-primary-foreground shadow-lg shadow-primary/40 overflow-hidden">
-                        <div className="flex flex-row justify-between items-center relative z-10">
-                            <div>
-                                <p className="text-xs font-black uppercase opacity-70 tracking-widest mb-1">{t('result.finalPrice')}</p>
-                                <h3 className="text-4xl font-black">{formatCurrency(result.finalPrice)}</h3>
+                        <div className="flex flex-col gap-3 relative z-10">
+                            <div className="flex flex-row justify-between items-center">
+                                <div>
+                                    <p className="text-xs font-black uppercase opacity-70 tracking-widest mb-1">{t('result.finalPrice')}</p>
+                                    <h3 className="text-4xl font-black">{formatCurrency(result.finalPrice)}</h3>
+                                </div>
+                                <TrendingUp className="opacity-20" size={80} />
                             </div>
-                            <TrendingUp className="opacity-20" size={80} />
+                            {weight > 0 && (
+                                <div className="flex justify-between items-center pt-2 border-t border-primary-foreground/20">
+                                    <span className="text-[11px] font-medium opacity-80">{t('result.perGram')}</span>
+                                    <span className="text-sm font-bold">
+                                        {formatCurrency(pricePerGram)}/{t('units.gram')}
+                                    </span>
+                                </div>
+                            )}
                         </div>
                     </div>
 

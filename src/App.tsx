@@ -403,7 +403,7 @@ function App() {
               {/* Результат */}
               <aside className="lg:col-span-1" aria-label="Calculation results">
                 <div className="sticky top-4">
-                  <CalculationResultComponent result={result} />
+                  <CalculationResultComponent result={result} weight={currentState.weight} />
                 </div>
               </aside>
             </div>

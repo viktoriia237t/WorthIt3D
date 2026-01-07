@@ -28,7 +28,7 @@ export interface CalculationState {
 
   // Бізнес
   failureRate: number; // Запас на невдалий друк (коефіцієнт, наприклад 1.1 = +10%)
-  markup: number; // Націнка (коефіцієнт, наприклад 1.5 = +50%)
+  markup: number; // Націнка (відсотки, наприклад 100 = +100%)
 
   // Додаткові витрати (для Resin друку)
   consumables: number; // Витратні матеріали (грн)
@@ -109,7 +109,7 @@ export const DEFAULT_CALCULATION_STATE: CalculationState = {
 
   // Бізнес
   failureRate: 1,
-  markup: 1,
+  markup: 100,
 
   // Додаткові витрати
   consumables: 0,

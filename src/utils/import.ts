@@ -154,7 +154,7 @@ export async function importFromCSV(file: File): Promise<CalculationHistory[]> {
               bedLifespan: parseNumber(row['Bed Life(h)']),
               hourlyRate: parseNumber(row['Hourly Rate']),
               failureRate: parseNumber(row['Failure Rate'], 1.0),
-              markup: parseNumber(row['Markup'], 1.0),
+              markup: parseNumber(row['Markup'], 100),
               consumables: parseNumber(row['Consumables']),
               customExpenses: [], // CSV doesn't preserve custom expenses array
               includeOlxFee: parseBoolean(row['Include OLX']),

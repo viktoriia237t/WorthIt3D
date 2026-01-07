@@ -56,8 +56,9 @@ export const useCalculator = (state: CalculationState): CalculationResult => {
     const totalCost = subtotal * state.failureRate;
 
     // Фінальна ціна (з націнкою)
-    // Price = TotalCost × markup
-    const finalPrice = totalCost * state.markup;
+    // Price = TotalCost × (markup/100)
+    // markup is in percentage, e.g., 100 = 100% = 1x (no markup), 200 = 200% = 2x
+    const finalPrice = totalCost * (state.markup / 100);
 
     // Чистий прибуток
     const profit = finalPrice - totalCost;

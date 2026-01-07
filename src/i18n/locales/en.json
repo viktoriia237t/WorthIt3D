@@ -179,6 +179,7 @@
     "profit": "Your Profit",
     "olxPrice": "Price with OLX fee",
     "olxProfit": "Profit after OLX",
+    "perGram": "Per gram",
     "tip": "Tip:",
     "tipMessage": "This price is calculated based on your settings. You can adjust the markup in the configuration menu for competitiveness."
   },
@@ -193,6 +194,7 @@
   },
   "units": {
     "grams": "g",
+    "gram": "g",
     "hours": "hrs",
     "uah": "$",
     "uahPerHour": "$/hr",
