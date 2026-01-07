@@ -52,8 +52,10 @@ export const CalculationHistory: React.FC<CalculationHistoryProps> = ({
     const { t } = useTranslation();
     const { isOpen, onOpen, onOpenChange } = useDisclosure();
     const { isOpen: isDeleteAllOpen, onOpen: onDeleteAllOpen, onOpenChange: onDeleteAllOpenChange } = useDisclosure();
+    const { isOpen: isDeleteOneOpen, onOpen: onDeleteOneOpen, onOpenChange: onDeleteOneOpenChange } = useDisclosure();
     const { isOpen: isMergeModalOpen, onOpen: onMergeModalOpen, onOpenChange: onMergeModalOpenChange } = useDisclosure();
     const [selectedItem, setSelectedItem] = useState<CalculationHistoryType | null>(null);
+    const [itemToDelete, setItemToDelete] = useState<CalculationHistoryType | null>(null);
     const [importedData, setImportedData] = useState<CalculationHistoryType[] | null>(null);
     const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -341,7 +343,15 @@ export const CalculationHistory: React.FC<CalculationHistoryProps> = ({
                                                     </Button>
                                                 </Tooltip>
                                                 <Tooltip color="danger" content={t('history.tooltips.delete')}>
-                                                    <Button isIconOnly size="sm" variant="light" onPress={() => onDelete(item.id)}>
+                                                    <Button
+                                                        isIconOnly
+                                                        size="sm"
+                                                        variant="light"
+                                                        onPress={() => {
+                                                            setItemToDelete(item);
+                                                            onDeleteOneOpen();
+                                                        }}
+                                                    >
                                                         <Trash2 size={18} className="text-danger" />
                                                     </Button>
                                                 </Tooltip>
@@ -467,6 +477,51 @@ export const CalculationHistory: React.FC<CalculationHistoryProps> = ({
                                 </Button>
                                 <Button color="danger" onPress={() => {
                                     onClearAll();
+                                    onClose();
+                                }}>
+                                    {t('buttons.delete')}
+                                </Button>
+                            </ModalFooter>
+                        </>
+                    )}
+                </ModalContent>
+            </Modal>
+
+            {/* Delete One Item Confirmation Modal */}
+            <Modal
+                isOpen={isDeleteOneOpen}
+                onOpenChange={onDeleteOneOpenChange}
+                size="md"
+                backdrop="blur"
+            >
+                <ModalContent>
+                    {(onClose) => (
+                        <>
+                            <ModalHeader className="flex flex-col gap-1">
+                                <span className="text-danger font-bold">{t('history.confirmDeleteOne.title')}</span>
+                            </ModalHeader>
+                            <ModalBody>
+                                <p className="text-default-600">{t('history.confirmDeleteOne.message')}</p>
+                                {itemToDelete && (
+                                    <div className="mt-3 p-3 bg-default-100 rounded-lg">
+                                        <p className="text-small font-semibold text-default-700">
+                                            {itemToDelete.modelName || t('history.noName')}
+                                        </p>
+                                        <p className="text-tiny text-default-500">
+                                            {formatDate(itemToDelete.timestamp)}
+                                        </p>
+                                    </div>
+                                )}
+                            </ModalBody>
+                            <ModalFooter>
+                                <Button color="default" variant="flat" onPress={onClose}>
+                                    {t('buttons.cancel')}
+                                </Button>
+                                <Button color="danger" onPress={() => {
+                                    if (itemToDelete) {
+                                        onDelete(itemToDelete.id);
+                                        setItemToDelete(null);
+                                    }
                                     onClose();
                                 }}>
                                     {t('buttons.delete')}

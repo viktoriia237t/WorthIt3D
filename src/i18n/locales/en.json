@@ -64,6 +64,10 @@
       "title": "Delete all history?",
       "message": "Are you sure you want to delete all calculation history? This action cannot be undone."
     },
+    "confirmDeleteOne": {
+      "title": "Delete calculation?",
+      "message": "Are you sure you want to delete this calculation? This action cannot be undone."
+    },
     "export": {
       "json": "Export JSON",
       "csv": "Export CSV",
