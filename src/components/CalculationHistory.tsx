@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 // Імпорти HeroUI з окремих пакетів
 import { Table, TableHeader, TableColumn, TableBody, TableRow, TableCell } from "@heroui/table";
@@ -10,6 +10,7 @@ import { Divider } from "@heroui/divider";
 import { Chip } from "@heroui/chip";
 import { Tooltip } from "@heroui/tooltip";
 import { ScrollShadow } from "@heroui/scroll-shadow";
+import { addToast } from '@heroui/toast';
 
 // Іконки
 import {
@@ -22,9 +23,14 @@ import {
     Clock,
     Pin,
     PinOff,
+    Download,
+    Upload,
 } from "lucide-react";
 
 import type { CalculationHistory as CalculationHistoryType } from '../types/calculator';
+import { exportToJSON, exportToCSV } from '../utils/export';
+import { importFromJSON, importFromCSV } from '../utils/import';
+import { ImportMergeModal } from './ImportMergeModal';
 
 interface CalculationHistoryProps {
     history: CalculationHistoryType[];
@@ -32,6 +38,7 @@ interface CalculationHistoryProps {
     onEdit: (id: string) => void;
     onTogglePin: (id: string) => void;
     onClearAll: () => void;
+    onImport: (data: CalculationHistoryType[], strategy: 'replace' | 'skip' | 'update') => void;
 }
 
 export const CalculationHistory: React.FC<CalculationHistoryProps> = ({
@@ -40,11 +47,15 @@ export const CalculationHistory: React.FC<CalculationHistoryProps> = ({
                                                                           onEdit,
                                                                           onTogglePin,
                                                                           onClearAll,
+                                                                          onImport,
                                                                       }) => {
     const { t } = useTranslation();
     const { isOpen, onOpen, onOpenChange } = useDisclosure();
     const { isOpen: isDeleteAllOpen, onOpen: onDeleteAllOpen, onOpenChange: onDeleteAllOpenChange } = useDisclosure();
+    const { isOpen: isMergeModalOpen, onOpen: onMergeModalOpen, onOpenChange: onMergeModalOpenChange } = useDisclosure();
     const [selectedItem, setSelectedItem] = useState<CalculationHistoryType | null>(null);
+    const [importedData, setImportedData] = useState<CalculationHistoryType[] | null>(null);
+    const fileInputRef = useRef<HTMLInputElement>(null);
 
     const formatDate = (timestamp: number) => {
         return new Intl.DateTimeFormat('uk-UA', {
@@ -70,6 +81,96 @@ export const CalculationHistory: React.FC<CalculationHistoryProps> = ({
         onOpen();
     };
 
+    const handleExportJSON = () => {
+        if (history.length === 0) {
+            addToast({
+                title: t('history.export.emptyHistory'),
+                color: "warning",
+                variant: "flat",
+                timeout: 3000,
+            });
+            return;
+        }
+        exportToJSON(history);
+        addToast({
+            title: t('history.export.success'),
+            color: "success",
+            variant: "flat",
+            timeout: 3000,
+        });
+    };
+
+    const handleExportCSV = () => {
+        if (history.length === 0) {
+            addToast({
+                title: t('history.export.emptyHistory'),
+                color: "warning",
+                variant: "flat",
+                timeout: 3000,
+            });
+            return;
+        }
+        exportToCSV(history);
+        addToast({
+            title: t('history.export.success'),
+            color: "success",
+            variant: "flat",
+            timeout: 3000,
+        });
+    };
+
+    const handleImportFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (!file) return;
+
+        try {
+            let parsed: CalculationHistoryType[];
+
+            if (file.name.endsWith('.json')) {
+                parsed = await importFromJSON(file);
+            } else if (file.name.endsWith('.csv')) {
+                parsed = await importFromCSV(file);
+            } else {
+                addToast({
+                    title: t('history.import.invalidFormat'),
+                    color: "danger",
+                    variant: "flat",
+                    timeout: 5000,
+                });
+                return;
+            }
+
+            setImportedData(parsed);
+            onMergeModalOpen();
+        } catch (error) {
+            addToast({
+                title: t('history.import.parseError', { error: (error as Error).message }),
+                color: "danger",
+                variant: "flat",
+                timeout: 5000,
+            });
+        } finally {
+            // Reset file input
+            if (fileInputRef.current) {
+                fileInputRef.current.value = '';
+            }
+        }
+    };
+
+    const handleConfirmImport = (strategy: 'replace' | 'skip' | 'update') => {
+        if (!importedData) return;
+
+        onImport(importedData, strategy);
+        addToast({
+            title: t('history.import.success', { count: importedData.length }),
+            color: "success",
+            variant: "flat",
+            timeout: 3000,
+        });
+        setImportedData(null);
+        onMergeModalOpenChange();
+    };
+
     if (history.length === 0) {
         return (
             <Card shadow="sm" className="bg-default-50/50 border-dashed border-2 border-default-200">
@@ -91,27 +192,71 @@ export const CalculationHistory: React.FC<CalculationHistoryProps> = ({
     return (
         <>
             <Card shadow="sm">
-                <CardHeader className="flex flex-col md:flex-row justify-between items-center px-6 py-4">
-                    <div className="flex items-center gap-3">
-                        <div className="p-2 bg-secondary/10 rounded-lg">
-                            <History className="text-secondary" size={20} />
+                <CardHeader className="flex flex-col gap-3 px-6 py-4">
+                    <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-3 w-full">
+                        <div className="flex items-center gap-3">
+                            <div className="p-2 bg-secondary/10 rounded-lg">
+                                <History className="text-secondary" size={20} />
+                            </div>
+                            <div className="flex flex-col">
+                                <p className="text-md font-bold">{t('history.title')}</p>
+                                <p className="text-tiny text-default-500 uppercase">
+                                    {history.length} {t('history.recordsSaved')}
+                                </p>
+                            </div>
                         </div>
-                        <div className="flex flex-col">
-                            <p className="text-md font-bold">{t('history.title')}</p>
-                            <p className="text-tiny text-default-500 uppercase">
-                                {history.length} {t('history.recordsSaved')}
-                            </p>
+
+                        <div className="flex items-center gap-2 flex-wrap">
+                            <Button
+                                size="sm"
+                                variant="flat"
+                                startContent={<Download size={16} />}
+                                onPress={handleExportJSON}
+                                isDisabled={history.length === 0}
+                            >
+                                {t('history.export.json')}
+                            </Button>
+
+                            <Button
+                                size="sm"
+                                variant="flat"
+                                startContent={<Download size={16} />}
+                                onPress={handleExportCSV}
+                                isDisabled={history.length === 0}
+                            >
+                                {t('history.export.csv')}
+                            </Button>
+
+                            <Button
+                                size="sm"
+                                variant="flat"
+                                color="primary"
+                                startContent={<Upload size={16} />}
+                                onPress={() => fileInputRef.current?.click()}
+                            >
+                                {t('history.import.button')}
+                            </Button>
+
+                            <input
+                                ref={fileInputRef}
+                                type="file"
+                                accept=".json,.csv"
+                                className="hidden"
+                                onChange={handleImportFile}
+                            />
+
+                            <Button
+                                color="danger"
+                                variant="light"
+                                size="sm"
+                                startContent={<Trash2 size={16} />}
+                                onPress={onDeleteAllOpen}
+                                isDisabled={history.filter(h => !h.pinned).length === 0}
+                            >
+                                {t('buttons.clearAll')}
+                            </Button>
                         </div>
                     </div>
-                    <Button
-                        color="danger"
-                        variant="light"
-                        size="sm"
-                        startContent={<Trash2 size={16} />}
-                        onPress={onDeleteAllOpen}
-                    >
-                        {t('buttons.clearAll')}
-                    </Button>
                 </CardHeader>
                 <Divider />
 
@@ -331,6 +476,15 @@ export const CalculationHistory: React.FC<CalculationHistoryProps> = ({
                     )}
                 </ModalContent>
             </Modal>
+
+            {/* Import Merge Strategy Modal */}
+            <ImportMergeModal
+                isOpen={isMergeModalOpen}
+                onOpenChange={onMergeModalOpenChange}
+                importedData={importedData || []}
+                existingData={history}
+                onConfirm={handleConfirmImport}
+            />
         </>
     );
 };

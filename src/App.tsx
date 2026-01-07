@@ -115,7 +115,7 @@ function App() {
   }, [editingId]);
 
   const result = useCalculator(currentState);
-  const { history, addCalculation, deleteCalculation, updateCalculation, clearHistory, getCalculation, upsertCalculation, togglePin } = useCalculationHistory();
+  const { history, addCalculation, deleteCalculation, updateCalculation, clearHistory, getCalculation, upsertCalculation, togglePin, importHistory } = useCalculationHistory();
 
   // Memoize empty form check to avoid expensive JSON.stringify on every render
   const isEmptyForm = useMemo(
@@ -185,6 +185,18 @@ function App() {
   );
 
   const handleSaveCalculation = () => {
+    // Don't save if form is empty (all defaults) and no model info
+    if (isEmptyForm && !modelName && !modelLink && !note) {
+      addToast({
+        title: t('toast.emptyForm'),
+        description: t('toast.emptyFormDescription'),
+        color: "warning",
+        variant: "flat",
+        timeout: 3000,
+      });
+      return;
+    }
+
     if (editingId) {
       // Update existing entry (from edit mode)
       updateCalculation(editingId, currentState, result, note, modelName, modelLink);
@@ -198,9 +210,9 @@ function App() {
         timeout: 3000,
       });
     } else if (autoSaveId) {
-      // User clicked "Save" on an auto-saved draft - finalize it
+      // User clicked "Save" on an auto-saved draft - update it
       updateCalculation(autoSaveId, currentState, result, note, modelName, modelLink);
-      setAutoSaveId(null);
+      // Keep autoSaveId so subsequent saves update the same entry
       addToast({
         title: t('toast.saved'),
         description: modelName || t('toast.savedDescription'),
@@ -210,7 +222,9 @@ function App() {
       });
     } else {
       // Create new entry (no auto-save draft exists)
-      addCalculation(currentState, result, note, modelName, modelLink);
+      const newId = addCalculation(currentState, result, note, modelName, modelLink);
+      // Set autoSaveId to prevent duplicate saves on multiple clicks
+      setAutoSaveId(newId);
       addToast({
         title: t('toast.saved'),
         description: modelName || t('toast.savedDescription'),
@@ -411,6 +425,7 @@ function App() {
                     timeout: 3000,
                   });
                 }}
+                onImport={(data, strategy) => importHistory(data, strategy)}
               />
             </section>
           )}

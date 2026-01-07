@@ -33,7 +33,9 @@
     "updated": "Calculation updated successfully!",
     "savedDescription": "Added to history",
     "updatedDescription": "Changes saved",
-    "historyCleared": "History cleared"
+    "historyCleared": "History cleared",
+    "emptyForm": "Cannot save empty form",
+    "emptyFormDescription": "Please fill in at least one field or add model information"
   },
   "autoSave": {
     "lastSaved": "Auto-saved",
@@ -60,6 +62,32 @@
     "confirmDelete": {
       "title": "Delete all history?",
       "message": "Are you sure you want to delete all calculation history? This action cannot be undone."
+    },
+    "export": {
+      "json": "Export JSON",
+      "csv": "Export CSV",
+      "success": "History exported successfully",
+      "emptyHistory": "No calculations to export"
+    },
+    "import": {
+      "button": "Import",
+      "success": "Successfully imported {{count}} calculations",
+      "invalidFormat": "Invalid file format. Please upload JSON or CSV file.",
+      "parseError": "Failed to parse file: {{error}}",
+      "mergeModal": {
+        "title": "Import Calculations",
+        "summary": "Found {{total}} calculations ({{duplicates}} duplicates)",
+        "strategy": "Choose merge strategy:",
+        "replace": "Replace All",
+        "replaceDesc": "Clear existing history and import all data",
+        "skip": "Skip Duplicates (Recommended)",
+        "skipDesc": "Keep existing entries, add only new calculations",
+        "update": "Update Duplicates",
+        "updateDesc": "Update existing entries with imported data, add new ones",
+        "preview": "Preview (first 5 entries):",
+        "confirm": "Import",
+        "cancel": "Cancel"
+      }
     }
   },
   "modal": {

@@ -5,7 +5,7 @@ export function useDebouncedEffect(
   delay: number,
   deps: React.DependencyList
 ) {
-  const timeoutRef = useRef<number | null>(null);
+  const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const callbackRef = useRef(callback);
 
   // Always update callback ref to latest version

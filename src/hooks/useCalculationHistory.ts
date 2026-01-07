@@ -148,6 +148,54 @@ export const useCalculationHistory = () => {
     []
   );
 
+  // Імпорт історії з вибором стратегії об'єднання
+  const importHistory = useCallback((
+    imported: CalculationHistory[],
+    strategy: 'replace' | 'skip' | 'update'
+  ) => {
+    setHistory((prev) => {
+      if (strategy === 'replace') {
+        return imported.sort((a, b) => {
+          if (a.pinned && !b.pinned) return -1;
+          if (!a.pinned && b.pinned) return 1;
+          return b.timestamp - a.timestamp;
+        });
+      }
+
+      const existingIds = new Set(prev.map(h => h.id));
+
+      if (strategy === 'skip') {
+        const newEntries = imported.filter(h => !existingIds.has(h.id));
+        const merged = [...prev, ...newEntries];
+        return merged.sort((a, b) => {
+          if (a.pinned && !b.pinned) return -1;
+          if (!a.pinned && b.pinned) return 1;
+          return b.timestamp - a.timestamp;
+        });
+      }
+
+      if (strategy === 'update') {
+        const updated = prev.map(existing => {
+          const imp = imported.find(i => i.id === existing.id);
+          if (imp) {
+            // Preserve pinned status from existing
+            return { ...imp, pinned: existing.pinned };
+          }
+          return existing;
+        });
+        const newEntries = imported.filter(h => !existingIds.has(h.id));
+        const merged = [...updated, ...newEntries];
+        return merged.sort((a, b) => {
+          if (a.pinned && !b.pinned) return -1;
+          if (!a.pinned && b.pinned) return 1;
+          return b.timestamp - a.timestamp;
+        });
+      }
+
+      return prev;
+    });
+  }, []);
+
   return {
     history,
     addCalculation,
@@ -157,5 +205,6 @@ export const useCalculationHistory = () => {
     getCalculation,
     upsertCalculation,
     togglePin,
+    importHistory,
   };
 };
