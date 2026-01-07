@@ -3,7 +3,7 @@ User-agent: *
 Allow: /
 
 # Sitemap location
-Sitemap: https://viktoriia237t.github.io/WorthIt3D/sitemap.xml
+Sitemap: https://worthit3d.pp.ua/sitemap.xml
 
 # Crawl-delay (optional, helps prevent server overload)
 Crawl-delay: 1
