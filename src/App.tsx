@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import {Card, CardBody, } from "@heroui/card";
 import { Button, ButtonGroup } from "@heroui/button";
@@ -117,10 +117,14 @@ function App() {
   const result = useCalculator(currentState);
   const { history, addCalculation, deleteCalculation, updateCalculation, clearHistory, getCalculation, upsertCalculation, togglePin } = useCalculationHistory();
 
+  // Memoize empty form check to avoid expensive JSON.stringify on every render
+  const isEmptyForm = useMemo(
+    () => JSON.stringify(currentState) === JSON.stringify(DEFAULT_CALCULATION_STATE),
+    [currentState]
+  );
+
   // Track unsaved changes
   useEffect(() => {
-    // Check if form is not empty
-    const isEmptyForm = JSON.stringify(currentState) === JSON.stringify(DEFAULT_CALCULATION_STATE);
     const hasContent = !isEmptyForm || !!modelName || !!modelLink || !!note;
 
     // If we just saved (lastSaveTime exists), mark as saved
@@ -130,7 +134,7 @@ function App() {
     }
 
     setHasUnsavedChanges(hasContent);
-  }, [currentState, modelName, modelLink, note, isSaving, lastSaveTime]);
+  }, [isEmptyForm, modelName, modelLink, note, isSaving, lastSaveTime]);
 
   // Auto-save calculator state to history (debounced)
   useDebouncedEffect(
@@ -142,7 +146,6 @@ function App() {
       }
 
       // Don't auto-save if form is empty (all defaults) and no model info
-      const isEmptyForm = JSON.stringify(currentState) === JSON.stringify(DEFAULT_CALCULATION_STATE);
       if (isEmptyForm && !modelName && !modelLink && !note) {
         return;
       }
@@ -178,7 +181,7 @@ function App() {
       }
     },
     2000, // 2 second debounce delay
-    [currentState, modelName, modelLink, note, result, editingId, isSaving, upsertCalculation]
+    [currentState, modelName, modelLink, note, editingId, isSaving, upsertCalculation, isEmptyForm, autoSaveId]
   );
 
   const handleSaveCalculation = () => {
@@ -282,7 +285,7 @@ function App() {
         <Alert
           color="warning"
           variant="bordered"
-          className="mb-4 w-1/2 mx-auto"
+          className="mb-4 md:w-1/2 mx-auto "
           title={t('alert.development.title')}
           description={t('alert.development.description')}
         />

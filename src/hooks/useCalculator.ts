@@ -2,6 +2,12 @@ import { useMemo } from 'react';
 import type { CalculationState, CalculationResult } from '../types/calculator';
 
 export const useCalculator = (state: CalculationState): CalculationResult => {
+  // Pre-calculate custom expenses total to avoid recalculating when array reference changes
+  const customExpensesCost = useMemo(
+    () => state.customExpenses.reduce((sum, expense) => sum + expense.amount, 0),
+    [state.customExpenses]
+  );
+
   return useMemo(() => {
     // Helper function to handle division by zero
     const safeDivide = (numerator: number, denominator: number): number => {
@@ -38,11 +44,7 @@ export const useCalculator = (state: CalculationState): CalculationResult => {
     // 7. Витратні матеріали (для Resin друку)
     const consumablesCost = state.consumables;
 
-    // 8. Кастомні додаткові витрати
-    const customExpensesCost = state.customExpenses.reduce(
-      (sum, expense) => sum + expense.amount,
-      0
-    );
+    // 8. Кастомні додаткові витрати (pre-calculated above)
 
     // Підсумок всіх компонентів
     const subtotal =
@@ -80,5 +82,26 @@ export const useCalculator = (state: CalculationState): CalculationResult => {
       olxPrice,
       olxProfit,
     };
-  }, [state]);
+  }, [
+    state.weight,
+    state.spoolPrice,
+    state.spoolWeight,
+    state.printTime,
+    state.prepTime,
+    state.postTime,
+    state.powerConsumption,
+    state.electricityTariff,
+    state.printerPrice,
+    state.lifespan,
+    state.nozzlePrice,
+    state.nozzleLifespan,
+    state.bedPrice,
+    state.bedLifespan,
+    state.hourlyRate,
+    state.consumables,
+    state.failureRate,
+    state.markup,
+    state.includeOlxFee,
+    customExpensesCost,
+  ]);
 };

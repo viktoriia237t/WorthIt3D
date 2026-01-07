@@ -55,13 +55,23 @@ export const useCalculationHistory = () => {
   const updateCalculation = useCallback(
     (id: string, state: CalculationState, result: CalculationResult, note?: string, modelName?: string, modelLink?: string) => {
       setHistory((prev) => {
-        const updated = prev.map((item) =>
-          item.id === id
-            ? { ...item, state, result, note, modelName, modelLink, timestamp: Date.now() }
-            : item
-        );
-        // Sort by timestamp descending (newest first)
-        return updated.sort((a, b) => b.timestamp - a.timestamp);
+        // Find and update the item
+        const updatedItem = prev.find(item => item.id === id);
+        if (!updatedItem) return prev;
+
+        const updated = {
+          ...updatedItem,
+          state,
+          result,
+          note,
+          modelName,
+          modelLink,
+          timestamp: Date.now()
+        };
+
+        // Remove old item and add updated one at the start (newest first)
+        // No sorting needed - new items go to the front automatically
+        return [updated, ...prev.filter(item => item.id !== id)];
       });
     },
     []
@@ -102,23 +112,25 @@ export const useCalculationHistory = () => {
       const savedId = id || `calc-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`;
 
       setHistory((prev) => {
-        let updated;
         if (id) {
           // Спробувати оновити існуючий запис
-          const exists = prev.some((calc) => calc.id === id);
-          if (exists) {
-            // Оновити існуючий
-            updated = prev.map((calc) =>
-              calc.id === id
-                ? { ...calc, state, result, note, modelName, modelLink, timestamp: Date.now() }
-                : calc
-            );
-            // Sort by timestamp descending (newest first)
-            return updated.sort((a, b) => b.timestamp - a.timestamp);
+          const existingIndex = prev.findIndex((calc) => calc.id === id);
+          if (existingIndex !== -1) {
+            // Оновити існуючий - move to front
+            const updated = {
+              ...prev[existingIndex],
+              state,
+              result,
+              note,
+              modelName,
+              modelLink,
+              timestamp: Date.now()
+            };
+            return [updated, ...prev.filter((_, i) => i !== existingIndex)];
           }
         }
 
-        // Створити новий запис
+        // Створити новий запис - add to front
         const newCalculation: CalculationHistory = {
           id: savedId,
           timestamp: Date.now(),
@@ -128,7 +140,6 @@ export const useCalculationHistory = () => {
           modelName,
           modelLink,
         };
-        // New items are already at the top, but sort to be safe
         return [newCalculation, ...prev];
       });
 

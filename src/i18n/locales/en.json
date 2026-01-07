@@ -1,7 +1,7 @@
 {
   "header": {
     "title": "3D Printing Cost Calculator",
-    "subtitle": "Professional calculation of cost price and client price"
+    "subtitle": "Simple 3D printing cost calculation tool"
   },
   "alert": {
     "development": {
@@ -155,7 +155,7 @@
     "tipMessage": "This price is calculated based on your settings. You can adjust the markup in the configuration menu for competitiveness."
   },
   "footer": {
-    "line1": "Professional tool for calculating 3D printing costs with all expenses included",
+    "line1": "Tool for calculating 3D printing costs with all expenses included",
     "line2": "Includes materials, electricity, depreciation, labor, and business risks"
   },
   "seo": {
