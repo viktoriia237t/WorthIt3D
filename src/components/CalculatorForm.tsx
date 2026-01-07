@@ -159,7 +159,7 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({
                         </div>
                     }
                 >
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4" onFocus={(e) => e.stopPropagation()}>
                         <Input
                             type="text"
                             variant="flat"
@@ -197,7 +197,7 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({
                         </div>
                     }
                 >
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4" onFocus={(e) => e.stopPropagation()}>
                         <Input
                             type="number"
                             variant="flat"
@@ -250,7 +250,7 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({
                         </div>
                     }
                 >
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4" onFocus={(e) => e.stopPropagation()}>
                         <Input
                             type="number"
                             variant="flat"
@@ -303,7 +303,7 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({
                         </div>
                     }
                 >
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4" onFocus={(e) => e.stopPropagation()}>
                         <Input
                             type="number"
                             variant="flat"
@@ -388,7 +388,7 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({
                         </div>
                     }
                 >
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4" onFocus={(e) => e.stopPropagation()}>
                         <Input
                             type="number"
                             variant="flat"
@@ -470,7 +470,7 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({
                         </div>
                     }
                 >
-                    <div className="flex flex-col gap-3">
+                    <div className="flex flex-col gap-3" onFocus={(e) => e.stopPropagation()}>
                         {state.customExpenses.map((expense) => (
                             <div key={expense.id} className="grid grid-cols-1 md:grid-cols-[1fr_150px_auto] gap-3 items-end">
                                 <Input
