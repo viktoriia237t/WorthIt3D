@@ -3,6 +3,12 @@
     "title": "3D Printing Cost Calculator",
     "subtitle": "Professional calculation of cost price and client price"
   },
+  "alert": {
+    "development": {
+      "title": "Active Development",
+      "description": "This application is currently in active development. Some bugs may appear and performance issues may occur. Thank you for your patience!"
+    }
+  },
   "tabs": {
     "calculator": "Calculator",
     "history": "History"

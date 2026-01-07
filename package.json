@@ -12,6 +12,8 @@
   },
   "dependencies": {
     "@heroui/accordion": "^2.2.26",
+    "@heroui/alert": "^2.2.29",
+    "@heroui/badge": "^2.2.18",
     "@heroui/button": "^2.2.29",
     "@heroui/card": "^2.2.27",
     "@heroui/chip": "^2.2.24",

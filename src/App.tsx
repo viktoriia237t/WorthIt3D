@@ -5,6 +5,7 @@ import { Button, ButtonGroup } from "@heroui/button";
 import { Tabs, Tab } from "@heroui/tabs";
 import { Tooltip } from "@heroui/tooltip";
 import { Badge } from "@heroui/badge";
+import { Alert } from "@heroui/alert";
 import { Save, SaveAll, Eraser } from "lucide-react";
 import { ToastProvider, addToast } from "@heroui/toast";
 import { CalculatorForm } from './components/CalculatorForm';
@@ -120,7 +121,7 @@ function App() {
   useEffect(() => {
     // Check if form is not empty
     const isEmptyForm = JSON.stringify(currentState) === JSON.stringify(DEFAULT_CALCULATION_STATE);
-    const hasContent = !isEmptyForm || modelName || modelLink || note;
+    const hasContent = !isEmptyForm || !!modelName || !!modelLink || !!note;
 
     // If we just saved (lastSaveTime exists), mark as saved
     if (lastSaveTime && !isSaving) {
@@ -276,6 +277,15 @@ function App() {
             </p>
           </div>
         </header>
+
+        {/* Development Warning Alert */}
+        <Alert
+          color="warning"
+          variant="bordered"
+          className="mb-4 w-1/2 mx-auto"
+          title={t('alert.development.title')}
+          description={t('alert.development.description')}
+        />
 
         {/* Edit Mode Banner */}
         {editingId && (

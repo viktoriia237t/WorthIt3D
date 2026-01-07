@@ -3,9 +3,16 @@ import type { CalculationState, CalculationResult } from '../types/calculator';
 
 export const useCalculator = (state: CalculationState): CalculationResult => {
   return useMemo(() => {
+    // Helper function to handle division by zero
+    const safeDivide = (numerator: number, denominator: number): number => {
+      if (denominator === 0 || !isFinite(denominator)) return 0;
+      const result = numerator / denominator;
+      return isFinite(result) ? result : 0;
+    };
+
     // 1. Витрати на матеріал (C_mat)
     // C_mat = (weight × spoolPrice) / spoolWeight
-    const materialCost = (state.weight * state.spoolPrice) / state.spoolWeight;
+    const materialCost = safeDivide(state.weight * state.spoolPrice, state.spoolWeight);
 
     // 2. Електроенергія (C_elec)
     // C_elec = printTime × powerConsumption × electricityTariff
@@ -14,15 +21,15 @@ export const useCalculator = (state: CalculationState): CalculationResult => {
 
     // 3. Амортизація принтера (C_dep)
     // C_dep = (printerPrice / lifespan) × printTime
-    const depreciationCost = (state.printerPrice / state.lifespan) * state.printTime;
+    const depreciationCost = safeDivide(state.printerPrice, state.lifespan) * state.printTime;
 
     // 4. Знос сопла (C_nozzle)
     // C_nozzle = (nozzlePrice / nozzleLifespan) × printTime
-    const nozzleWearCost = (state.nozzlePrice / state.nozzleLifespan) * state.printTime;
+    const nozzleWearCost = safeDivide(state.nozzlePrice, state.nozzleLifespan) * state.printTime;
 
     // 5. Знос столу/плити (C_bed)
     // C_bed = (bedPrice / bedLifespan) × printTime
-    const bedWearCost = (state.bedPrice / state.bedLifespan) * state.printTime;
+    const bedWearCost = safeDivide(state.bedPrice, state.bedLifespan) * state.printTime;
 
     // 6. Ваша робота (C_labor)
     // C_labor = (prepTime + postTime) × hourlyRate
