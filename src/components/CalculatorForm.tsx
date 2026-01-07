@@ -414,10 +414,10 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({
                             variant="flat"
                             label={t('form.business.failureRate')}
                             labelPlacement="outside"
-                            placeholder="1"
+                            placeholder="0"
                             value={state.failureRate.toString()}
                             onChange={(e) => handleChange('failureRate', parseFloat(e.target.value) || 0)}
-                            min={1}
+                            min={0}
                         />
                         <Input
                             type="number"

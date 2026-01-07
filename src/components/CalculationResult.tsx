@@ -127,7 +127,6 @@ export const CalculationResultComponent: React.FC<CalculationResultProps> = ({
                         <div className="flex justify-between items-center">
                             <div className="flex flex-col">
                                 <span className="text-warning-700 dark:text-warning-400 font-bold">{t('result.totalCost')}</span>
-                                <span className="text-[10px] text-warning-600/70 uppercase font-bold">{t('result.failureRate')}</span>
                             </div>
                             <span className="text-xl font-bold text-warning-700 dark:text-warning-400">
                   {formatCurrency(result.totalCost)}

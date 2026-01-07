@@ -20,6 +20,7 @@
   },
   "buttons": {
     "save": "Save Calculation",
+    "saveAndNew": "Save and Create New",
     "update": "Update Calculation",
     "cancel": "Cancel",
     "clear": "Clear Form",

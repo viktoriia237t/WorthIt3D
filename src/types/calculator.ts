@@ -27,7 +27,7 @@ export interface CalculationState {
   hourlyRate: number; // Ставка за годину роботи (грн/год)
 
   // Бізнес
-  failureRate: number; // Запас на невдалий друк (коефіцієнт, наприклад 1.1 = +10%)
+  failureRate: number; // Запас на невдалий друк (відсотки, наприклад 10 = +10%)
   markup: number; // Націнка (відсотки, наприклад 100 = +100%)
 
   // Додаткові витрати (для Resin друку)
@@ -108,7 +108,7 @@ export const DEFAULT_CALCULATION_STATE: CalculationState = {
   hourlyRate: 0,
 
   // Бізнес
-  failureRate: 1,
+  failureRate: 0,
   markup: 100,
 
   // Додаткові витрати

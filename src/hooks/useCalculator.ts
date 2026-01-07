@@ -52,8 +52,11 @@ export const useCalculator = (state: CalculationState): CalculationResult => {
       bedWearCost + laborCost + consumablesCost + customExpensesCost;
 
     // Собівартість (з урахуванням браку)
-    // TotalCost = (C_mat + C_elec + C_dep + C_labor + consumables) × failureRate
-    const totalCost = subtotal * state.failureRate;
+    // TotalCost = subtotal + (subtotal × failureRate / 100)
+    // failureRate is now a percentage, e.g., 10 = +10%
+    const totalCost = state.failureRate > 0
+      ? subtotal + (subtotal * state.failureRate / 100)
+      : subtotal;
 
     // Фінальна ціна (з націнкою)
     // Price = TotalCost × (markup/100)
