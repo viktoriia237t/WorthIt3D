@@ -46,10 +46,10 @@ export const useCalculator = (state: CalculationState): CalculationResult => {
 
     // 8. Кастомні додаткові витрати (pre-calculated above)
 
-    // Підсумок всіх компонентів
+    // Підсумок всіх компонентів (без врахування вартості праці)
     const subtotal =
       materialCost + electricityCost + depreciationCost + nozzleWearCost +
-      bedWearCost + laborCost + consumablesCost + customExpensesCost;
+      bedWearCost + consumablesCost + customExpensesCost;
 
     // Собівартість (з урахуванням браку)
     // TotalCost = subtotal + (subtotal × failureRate / 100)
@@ -58,10 +58,10 @@ export const useCalculator = (state: CalculationState): CalculationResult => {
       ? subtotal + (subtotal * state.failureRate / 100)
       : subtotal;
 
-    // Фінальна ціна (з націнкою)
-    // Price = TotalCost × (markup/100)
+    // Фінальна ціна (з націнкою + вартість праці додається окремо, без множення на markup)
+    // Price = (TotalCost × (markup/100)) + laborCost
     // markup is in percentage, e.g., 100 = 100% = 1x (no markup), 200 = 200% = 2x
-    const finalPrice = totalCost * (state.markup / 100);
+    const finalPrice = totalCost * (state.markup / 100) + laborCost;
 
     // Чистий прибуток
     const profit = finalPrice - totalCost;

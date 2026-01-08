@@ -130,64 +130,88 @@ export async function importFromCSV(file: File): Promise<CalculationHistory[]> {
   const text = await file.text();
 
   return new Promise((resolve, reject) => {
-    Papa.parse(text, {
+    // Check if file has system headers comment line
+    const lines = text.split('\n');
+    let systemHeaders: string[] | null = null;
+    let csvText = text;
+
+    // Extract system headers if present (first line starting with #)
+    if (lines[0]?.trim().startsWith('#')) {
+      const headerLine = lines[0].substring(1).trim(); // Remove # prefix
+      systemHeaders = headerLine.split(',').map(h => h.trim());
+      // Remove comment line from CSV for parsing
+      csvText = lines.slice(1).join('\n');
+    }
+
+    Papa.parse(csvText, {
       header: true,
       skipEmptyLines: true,
+      comments: '#', // Skip any other comment lines
       complete: (results) => {
         try {
           const calculations: CalculationHistory[] = results.data.map((row: any) => {
+            // If we have system headers, remap the row using them
+            let mappedRow = row;
+            if (systemHeaders && results.meta.fields) {
+              mappedRow = {};
+              results.meta.fields.forEach((translatedHeader: string, i: number) => {
+                const systemHeader = systemHeaders[i];
+                mappedRow[systemHeader] = row[translatedHeader];
+              });
+            }
+
             // Parse state
             const state: CalculationState = {
-              weight: parseNumber(row['Weight(g)']),
-              spoolPrice: parseNumber(row['Spool Price']),
-              spoolWeight: parseNumber(row['Spool Weight']),
-              printTime: parseNumber(row['Print Time(h)']),
-              prepTime: parseNumber(row['Prep Time(h)']),
-              postTime: parseNumber(row['Post Time(h)']),
-              powerConsumption: parseNumber(row['Power(kW)']),
-              electricityTariff: parseNumber(row['Tariff']),
-              printerPrice: parseNumber(row['Printer Price']),
-              lifespan: parseNumber(row['Lifespan(h)']),
-              nozzlePrice: parseNumber(row['Nozzle Price']),
-              nozzleLifespan: parseNumber(row['Nozzle Life(h)']),
-              bedPrice: parseNumber(row['Bed Price']),
-              bedLifespan: parseNumber(row['Bed Life(h)']),
-              hourlyRate: parseNumber(row['Hourly Rate']),
-              failureRate: parseNumber(row['Failure Rate'], 1.0),
-              markup: parseNumber(row['Markup'], 100),
-              consumables: parseNumber(row['Consumables']),
+              weight: parseNumber(mappedRow['Weight(g)']),
+              spoolPrice: parseNumber(mappedRow['Spool Price']),
+              spoolWeight: parseNumber(mappedRow['Spool Weight']),
+              printTime: parseNumber(mappedRow['Print Time(h)']),
+              prepTime: parseNumber(mappedRow['Prep Time(h)']),
+              postTime: parseNumber(mappedRow['Post Time(h)']),
+              powerConsumption: parseNumber(mappedRow['Power(kW)']),
+              electricityTariff: parseNumber(mappedRow['Tariff']),
+              printerPrice: parseNumber(mappedRow['Printer Price']),
+              lifespan: parseNumber(mappedRow['Lifespan(h)']),
+              nozzlePrice: parseNumber(mappedRow['Nozzle Price']),
+              nozzleLifespan: parseNumber(mappedRow['Nozzle Life(h)']),
+              bedPrice: parseNumber(mappedRow['Bed Price']),
+              bedLifespan: parseNumber(mappedRow['Bed Life(h)']),
+              hourlyRate: parseNumber(mappedRow['Hourly Rate']),
+              failureRate: parseNumber(mappedRow['Failure Rate'], 1.0),
+              markup: parseNumber(mappedRow['Markup'], 100),
+              consumables: parseNumber(mappedRow['Consumables']),
               customExpenses: [], // CSV doesn't preserve custom expenses array
-              includeOlxFee: parseBoolean(row['Include OLX']),
+              includeOlxFee: parseBoolean(mappedRow['Include OLX']),
             };
 
             // Parse result
             const result: CalculationResult = {
-              materialCost: parseNumber(row['Material Cost']),
-              electricityCost: parseNumber(row['Electricity Cost']),
-              depreciationCost: parseNumber(row['Depreciation']),
-              nozzleWearCost: parseNumber(row['Nozzle Wear']),
-              bedWearCost: parseNumber(row['Bed Wear']),
-              laborCost: parseNumber(row['Labor Cost']),
-              consumablesCost: parseNumber(row['Consumables Cost']),
-              customExpensesCost: parseNumber(row['Custom Expenses']),
-              subtotal: parseNumber(row['Subtotal']),
-              totalCost: parseNumber(row['Total Cost']),
-              finalPrice: parseNumber(row['Final Price']),
-              profit: parseNumber(row['Profit']),
-              olxPrice: parseNumber(row['OLX Price']),
-              olxProfit: parseNumber(row['OLX Profit']),
+              materialCost: parseNumber(mappedRow['Material Cost']),
+              electricityCost: parseNumber(mappedRow['Electricity Cost']),
+              depreciationCost: parseNumber(mappedRow['Depreciation']),
+              nozzleWearCost: parseNumber(mappedRow['Nozzle Wear']),
+              bedWearCost: parseNumber(mappedRow['Bed Wear']),
+              laborCost: parseNumber(mappedRow['Labor Cost']),
+              consumablesCost: parseNumber(mappedRow['Consumables Cost']),
+              customExpensesCost: parseNumber(mappedRow['Custom Expenses']),
+              subtotal: parseNumber(mappedRow['Subtotal']),
+              totalCost: parseNumber(mappedRow['Total Cost']),
+              finalPrice: parseNumber(mappedRow['Final Price']),
+              profit: parseNumber(mappedRow['Profit']),
+              olxPrice: parseNumber(mappedRow['OLX Price']),
+              olxProfit: parseNumber(mappedRow['OLX Profit']),
             };
 
             // Build calculation history item
             const calculation: CalculationHistory = {
-              id: row['ID'] || `calc-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`,
-              timestamp: row['Date'] ? parseDate(row['Date']) : Date.now(),
+              id: mappedRow['ID'] || `calc-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`,
+              timestamp: mappedRow['Date'] ? parseDate(mappedRow['Date']) : Date.now(),
               state,
               result,
-              note: row['Note'] || undefined,
-              modelName: row['Model Name'] || undefined,
-              modelLink: row['Model Link'] || undefined,
-              pinned: parseBoolean(row['Pinned']),
+              note: mappedRow['Note'] || undefined,
+              modelName: mappedRow['Model Name'] || undefined,
+              modelLink: mappedRow['Model Link'] || undefined,
+              pinned: parseBoolean(mappedRow['Pinned']),
             };
 
             return calculation;

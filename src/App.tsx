@@ -206,6 +206,12 @@ function App() {
         return;
       }
 
+      // Check if we need to save RIGHT NOW (not when debounce was triggered)
+      // This prevents saving after manual save cleared the IDs
+      if (!hasUnsavedChanges) {
+        return;
+      }
+
       // Don't auto-save if form is empty (all defaults) and no model info
       if (isEmptyForm && !modelName && !modelLink && !note) {
         return;
@@ -242,7 +248,7 @@ function App() {
       }
     },
     2000, // 2 second debounce delay
-    [currentState, modelName, modelLink, note, editingId, isSaving, upsertCalculation, isEmptyForm, autoSaveId]
+    [currentState, modelName, modelLink, note, editingId, isSaving, upsertCalculation, isEmptyForm, autoSaveId, hasUnsavedChanges]
   );
 
   const handleSaveCalculation = () => {
@@ -258,47 +264,57 @@ function App() {
       return;
     }
 
-    if (editingId) {
-      // Update existing entry (from edit mode)
-      updateCalculation(editingId, currentState, result, note, modelName, modelLink);
-      setEditingId(null);
-      setAutoSaveId(null); // Clear auto-save ID
-      logEvent('Calculation', 'update', 'edit_mode').catch(console.error);
-      addToast({
-        title: t('toast.updated'),
-        description: modelName || t('toast.updatedDescription'),
-        color: "success",
-        variant: "flat",
-        timeout: 3000,
-      });
-    } else if (autoSaveId) {
-      // User clicked "Save" on an auto-saved draft - update it
-      updateCalculation(autoSaveId, currentState, result, note, modelName, modelLink);
-      // Keep autoSaveId so subsequent saves update the same entry
-      logEvent('Calculation', 'save', 'update_draft').catch(console.error);
-      addToast({
-        title: t('toast.saved'),
-        description: modelName || t('toast.savedDescription'),
-        color: "success",
-        variant: "flat",
-        timeout: 3000,
-      });
-    } else {
-      // Create new entry (no auto-save draft exists)
-      const newId = addCalculation(currentState, result, note, modelName, modelLink);
-      // Set autoSaveId to prevent duplicate saves on multiple clicks
-      setAutoSaveId(newId);
-      logEvent('Calculation', 'save', 'new').catch(console.error);
-      addToast({
-        title: t('toast.saved'),
-        description: modelName || t('toast.savedDescription'),
-        color: "success",
-        variant: "flat",
-        timeout: 3000,
-      });
+    // Prevent concurrent saves
+    if (isSaving) {
+      return;
     }
-    setNote('');
-    setLastSaveTime(Date.now());
+
+    setIsSaving(true);
+    try {
+      if (editingId) {
+        // Update existing entry (from edit mode)
+        updateCalculation(editingId, currentState, result, note, modelName, modelLink);
+        setEditingId(null);
+        setAutoSaveId(null); // Clear auto-save ID
+        logEvent('Calculation', 'update', 'edit_mode').catch(console.error);
+        addToast({
+          title: t('toast.updated'),
+          description: modelName || t('toast.updatedDescription'),
+          color: "success",
+          variant: "flat",
+          timeout: 3000,
+        });
+      } else if (autoSaveId) {
+        // User clicked "Save" on an auto-saved draft - update it
+        updateCalculation(autoSaveId, currentState, result, note, modelName, modelLink);
+        // Keep autoSaveId so subsequent saves update the same entry
+        logEvent('Calculation', 'save', 'update_draft').catch(console.error);
+        addToast({
+          title: t('toast.saved'),
+          description: modelName || t('toast.savedDescription'),
+          color: "success",
+          variant: "flat",
+          timeout: 3000,
+        });
+      } else {
+        // Create new entry (no auto-save draft exists)
+        const newId = addCalculation(currentState, result, note, modelName, modelLink);
+        // Set autoSaveId to prevent duplicate saves on multiple clicks
+        setAutoSaveId(newId);
+        logEvent('Calculation', 'save', 'new').catch(console.error);
+        addToast({
+          title: t('toast.saved'),
+          description: modelName || t('toast.savedDescription'),
+          color: "success",
+          variant: "flat",
+          timeout: 3000,
+        });
+      }
+      setNote('');
+      setLastSaveTime(Date.now());
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   const handleSaveAndNew = () => {

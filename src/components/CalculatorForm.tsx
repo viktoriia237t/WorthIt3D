@@ -26,6 +26,7 @@ import {
 import type { CalculationState, CustomExpense } from '../types/calculator';
 import { DEFAULT_CALCULATION_STATE } from '../types/calculator';
 import { Button } from '@heroui/button';
+import { NumberInput } from './NumberInput';
 
 interface CalculatorFormProps {
     initialState?: CalculationState;
@@ -198,38 +199,38 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({
                     }
                 >
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4" onFocus={(e) => e.stopPropagation()}>
-                        <Input
-                            type="number"
+                        <NumberInput
                             variant="flat"
                             label={t('form.materials.weight')}
                             labelPlacement="outside"
                             placeholder="0.00"
                             startContent={<Weight size={18} className="text-default-400" />}
                             endContent={<span className="text-tiny text-default-400">{t('units.grams')}</span>}
-                            value={state.weight.toString()}
-                            onChange={(e) => handleChange('weight', parseFloat(e.target.value) || 0)}
+                            value={state.weight}
+                            onChange={(value) => handleChange('weight', value)}
+                            min={0}
                         />
-                        <Input
-                            type="number"
+                        <NumberInput
                             variant="flat"
                             label={t('form.materials.spoolPrice')}
                             labelPlacement="outside"
                             placeholder="800"
                             startContent={<CircleDollarSign size={18} className="text-default-400" />}
                             endContent={<span className="text-tiny text-default-400">{t('units.uah')}</span>}
-                            value={state.spoolPrice.toString()}
-                            onChange={(e) => handleChange('spoolPrice', parseFloat(e.target.value) || 0)}
+                            value={state.spoolPrice}
+                            onChange={(value) => handleChange('spoolPrice', value)}
+                            min={0}
                         />
-                        <Input
+                        <NumberInput
                             className="md:col-span-2"
-                            type="number"
                             variant="flat"
                             label={t('form.materials.spoolWeight')}
                             labelPlacement="outside"
                             placeholder="1000"
                             endContent={<span className="text-tiny text-default-400">{t('units.grams')}</span>}
-                            value={state.spoolWeight.toString()}
-                            onChange={(e) => handleChange('spoolWeight', parseFloat(e.target.value) || 0)}
+                            value={state.spoolWeight}
+                            onChange={(value) => handleChange('spoolWeight', value)}
+                            min={0}
                         />
                     </div>
                 </AccordionItem>
@@ -251,38 +252,32 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({
                     }
                 >
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-4" onFocus={(e) => e.stopPropagation()}>
-                        <Input
-                            type="number"
+                        <NumberInput
                             variant="flat"
                             label={t('form.time.printTime')}
                             labelPlacement="outside"
-                            value={state.printTime.toString()}
-                            onChange={(e) => handleChange('printTime', parseFloat(e.target.value) || 0)}
+                            value={state.printTime}
+                            onChange={(value) => handleChange('printTime', value)}
                             endContent={<span className="text-tiny text-default-400">{t('units.hours')}</span>}
                             min={0}
-                            step={0.1}
                         />
-                        <Input
-                            type="number"
+                        <NumberInput
                             variant="flat"
                             label={t('form.time.prepTime')}
                             labelPlacement="outside"
-                            value={state.prepTime.toString()}
-                            onChange={(e) => handleChange('prepTime', parseFloat(e.target.value) || 0)}
+                            value={state.prepTime}
+                            onChange={(value) => handleChange('prepTime', value)}
                             endContent={<span className="text-tiny text-default-400">{t('units.hours')}</span>}
                             min={0}
-                            step={0.1}
                         />
-                        <Input
-                            type="number"
+                        <NumberInput
                             variant="flat"
                             label={t('form.time.postTime')}
                             labelPlacement="outside"
-                            value={state.postTime.toString()}
-                            onChange={(e) => handleChange('postTime', parseFloat(e.target.value) || 0)}
+                            value={state.postTime}
+                            onChange={(value) => handleChange('postTime', value)}
                             endContent={<span className="text-tiny text-default-400">{t('units.hours')}</span>}
                             min={0}
-                            step={0.1}
                         />
                     </div>
                 </AccordionItem>
@@ -304,71 +299,71 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({
                     }
                 >
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4" onFocus={(e) => e.stopPropagation()}>
-                        <Input
-                            type="number"
+                        <NumberInput
                             variant="flat"
                             label={t('form.electricity.powerConsumption')}
                             labelPlacement="outside"
                             startContent={<Zap size={18} className="text-default-400" />}
-                            value={state.powerConsumption.toString()}
-                            onChange={(e) => handleChange('powerConsumption', parseFloat(e.target.value) || 0)}
+                            value={state.powerConsumption}
+                            onChange={(value) => handleChange('powerConsumption', value)}
+                            min={0}
                         />
-                        <Input
-                            type="number"
+                        <NumberInput
                             variant="flat"
                             label={t('form.electricity.tariff')}
                             labelPlacement="outside"
-                            value={state.electricityTariff.toString()}
-                            onChange={(e) => handleChange('electricityTariff', parseFloat(e.target.value) || 0)}
+                            value={state.electricityTariff}
+                            onChange={(value) => handleChange('electricityTariff', value)}
+                            min={0}
                         />
-                        <Input
-                            type="number"
+                        <NumberInput
                             variant="flat"
                             label={t('form.depreciation.printerPrice')}
                             labelPlacement="outside"
                             startContent={<Wrench size={18} className="text-default-400" />}
-                            value={state.printerPrice.toString()}
-                            onChange={(e) => handleChange('printerPrice', parseFloat(e.target.value) || 0)}
+                            value={state.printerPrice}
+                            onChange={(value) => handleChange('printerPrice', value)}
+                            min={0}
                         />
-                        <Input
-                            type="number"
+                        <NumberInput
                             variant="flat"
                             label={t('form.depreciation.lifespan')}
                             labelPlacement="outside"
-                            value={state.lifespan.toString()}
-                            onChange={(e) => handleChange('lifespan', parseFloat(e.target.value) || 0)}
+                            value={state.lifespan}
+                            onChange={(value) => handleChange('lifespan', value)}
+                            min={0}
                         />
-                        <Input
-                            type="number"
+                        <NumberInput
                             variant="flat"
                             label={t('form.depreciation.nozzlePrice')}
                             labelPlacement="outside"
-                            value={state.nozzlePrice.toString()}
-                            onChange={(e) => handleChange('nozzlePrice', parseFloat(e.target.value) || 0)}
+                            value={state.nozzlePrice}
+                            onChange={(value) => handleChange('nozzlePrice', value)}
+                            min={0}
                         />
-                        <Input
-                            type="number"
+                        <NumberInput
                             variant="flat"
                             label={t('form.depreciation.nozzleLifespan')}
                             labelPlacement="outside"
-                            value={state.nozzleLifespan.toString()}
-                            onChange={(e) => handleChange('nozzleLifespan', parseFloat(e.target.value) || 0)}
+                            value={state.nozzleLifespan}
+                            onChange={(value) => handleChange('nozzleLifespan', value)}
+                            min={0}
                         />
-                        <Input
-                            type="number"
+                        <NumberInput
                             variant="flat"
                             label={t('form.depreciation.bedPrice')}
                             labelPlacement="outside"
-                            value={state.bedPrice.toString()}
-                            onChange={(e) => handleChange('bedPrice', parseFloat(e.target.value) || 0)}
+                            value={state.bedPrice}
+                            onChange={(value) => handleChange('bedPrice', value)}
+                            min={0}
                         />
-                        <Input
-                            type="number"
+                        <NumberInput
                             variant="flat"
                             label={t('form.depreciation.bedLifespan')}
                             labelPlacement="outside"
-                            value={state.bedLifespan.toString()}
-                            onChange={(e) => handleChange('bedLifespan', parseFloat(e.target.value) || 0)}
+                            value={state.bedLifespan}
+                            onChange={(value) => handleChange('bedLifespan', value)}
+                            min={0}
                         />
                     </div>
                 </AccordionItem>
@@ -389,44 +384,42 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({
                     }
                 >
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4" onFocus={(e) => e.stopPropagation()}>
-                        <Input
-                            type="number"
+                        <NumberInput
                             variant="flat"
                             label={t('form.labor.hourlyRate')}
                             labelPlacement="outside"
                             startContent={<User size={18} className="text-default-400" />}
                             endContent={<span className="text-tiny text-default-400">{t('units.uahPerHour')}</span>}
-                            value={state.hourlyRate.toString()}
-                            onChange={(e) => handleChange('hourlyRate', parseFloat(e.target.value) || 0)}
+                            value={state.hourlyRate}
+                            onChange={(value) => handleChange('hourlyRate', value)}
+                            min={0}
                         />
-                        <Input
-                            type="number"
+                        <NumberInput
                             variant="flat"
                             label={t('form.business.markup')}
                             labelPlacement="outside"
                             placeholder="100"
-                            value={state.markup.toString()}
-                            onChange={(e) => handleChange('markup', parseFloat(e.target.value) || 0)}
+                            value={state.markup}
+                            onChange={(value) => handleChange('markup', value)}
                             min={0}
                         />
-                        <Input
-                            type="number"
+                        <NumberInput
                             variant="flat"
                             label={t('form.business.failureRate')}
                             labelPlacement="outside"
                             placeholder="0"
-                            value={state.failureRate.toString()}
-                            onChange={(e) => handleChange('failureRate', parseFloat(e.target.value) || 0)}
+                            value={state.failureRate}
+                            onChange={(value) => handleChange('failureRate', value)}
                             min={0}
                         />
-                        <Input
-                            type="number"
+                        <NumberInput
                             variant="flat"
                             label={t('form.additional.consumables')}
                             labelPlacement="outside"
                             startContent={<PlusCircle size={18} className="text-default-400" />}
-                            value={state.consumables.toString()}
-                            onChange={(e) => handleChange('consumables', parseFloat(e.target.value) || 0)}
+                            value={state.consumables}
+                            onChange={(value) => handleChange('consumables', value)}
+                            min={0}
                         />
                     </div>
                     {/* Показуємо OLX тільки для української мови */}
@@ -482,15 +475,15 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({
                                     value={expense.name}
                                     onChange={(e) => handleUpdateCustomExpense(expense.id, 'name', e.target.value)}
                                 />
-                                <Input
-                                    type="number"
+                                <NumberInput
                                     variant="flat"
                                     label={t('form.additional.expenseAmount')}
                                     labelPlacement="outside"
                                     placeholder="0"
                                     endContent={<span className="text-tiny text-default-400">{t('units.uah')}</span>}
-                                    value={expense.amount.toString()}
-                                    onChange={(e) => handleUpdateCustomExpense(expense.id, 'amount', parseFloat(e.target.value) || 0)}
+                                    value={expense.amount}
+                                    onChange={(value) => handleUpdateCustomExpense(expense.id, 'amount', value)}
+                                    min={0}
                                 />
                                 <Button
                                     isIconOnly

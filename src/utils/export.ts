@@ -1,4 +1,5 @@
 import type { CalculationHistory } from '../types/calculator';
+import i18n from '../i18n/config';
 
 /**
  * Format date for filenames (YYYY-MM-DD)
@@ -60,54 +61,67 @@ export function exportToJSON(history: CalculationHistory[]): void {
   downloadFile(blob, filename);
 }
 
+// Mapping of system field names to existing translation keys
+const FIELD_TRANSLATIONS: Record<string, string> = {
+  'ID': 'ID',
+  'Date': 'history.columns.dateAndNote',
+  'Model Name': 'form.modelInfo.name',
+  'Model Link': 'form.modelInfo.link',
+  'Note': 'form.modelInfo.note',
+  'Pinned': 'Pinned',
+  'Weight(g)': 'form.materials.weight',
+  'Spool Price': 'form.materials.spoolPrice',
+  'Spool Weight': 'form.materials.spoolWeight',
+  'Print Time(h)': 'form.time.printTime',
+  'Prep Time(h)': 'form.time.prepTime',
+  'Post Time(h)': 'form.time.postTime',
+  'Power(kW)': 'form.electricity.powerConsumption',
+  'Tariff': 'form.electricity.tariff',
+  'Printer Price': 'form.depreciation.printerPrice',
+  'Lifespan(h)': 'form.depreciation.lifespan',
+  'Nozzle Price': 'form.depreciation.nozzlePrice',
+  'Nozzle Life(h)': 'form.depreciation.nozzleLifespan',
+  'Bed Price': 'form.depreciation.bedPrice',
+  'Bed Life(h)': 'form.depreciation.bedLifespan',
+  'Hourly Rate': 'form.labor.hourlyRate',
+  'Failure Rate': 'form.business.failureRate',
+  'Markup': 'form.business.markup',
+  'Consumables': 'form.additional.consumables',
+  'Include OLX': 'form.business.includeOlxFee',
+  'Material Cost': 'result.materials',
+  'Electricity Cost': 'result.electricity',
+  'Depreciation': 'result.depreciation',
+  'Nozzle Wear': 'result.nozzleWear',
+  'Bed Wear': 'result.bedWear',
+  'Labor Cost': 'result.labor',
+  'Consumables Cost': 'result.consumables',
+  'Custom Expenses': 'result.customExpenses',
+  'Subtotal': 'result.subtotal',
+  'Total Cost': 'result.totalCost',
+  'Final Price': 'result.finalPrice',
+  'Profit': 'result.profit',
+  'OLX Price': 'result.olxPrice',
+  'OLX Profit': 'result.olxProfit',
+};
+
 /**
  * Convert calculation history to CSV format
  */
 function convertToCSV(history: CalculationHistory[]): string {
-  // CSV Header
-  const headers = [
-    'ID',
-    'Date',
-    'Model Name',
-    'Model Link',
-    'Note',
-    'Pinned',
-    'Weight(g)',
-    'Spool Price',
-    'Spool Weight',
-    'Print Time(h)',
-    'Prep Time(h)',
-    'Post Time(h)',
-    'Power(kW)',
-    'Tariff',
-    'Printer Price',
-    'Lifespan(h)',
-    'Nozzle Price',
-    'Nozzle Life(h)',
-    'Bed Price',
-    'Bed Life(h)',
-    'Hourly Rate',
-    'Failure Rate',
-    'Markup',
-    'Consumables',
-    'Include OLX',
-    'Material Cost',
-    'Electricity Cost',
-    'Depreciation',
-    'Nozzle Wear',
-    'Bed Wear',
-    'Labor Cost',
-    'Consumables Cost',
-    'Custom Expenses',
-    'Subtotal',
-    'Total Cost',
-    'Final Price',
-    'Profit',
-    'OLX Price',
-    'OLX Profit',
-  ];
+  const t = i18n.t.bind(i18n);
 
-  const rows = [headers.join(',')];
+  // System headers (language-independent field names)
+  const systemHeaders = Object.keys(FIELD_TRANSLATIONS);
+
+  // Translated headers (user-visible in current language)
+  const translatedHeaders = systemHeaders.map(key =>
+    key === 'ID' ? 'ID' : t(FIELD_TRANSLATIONS[key])
+  );
+
+  const rows = [
+    '# ' + systemHeaders.join(','), // Hidden system headers as comment
+    translatedHeaders.join(','),     // Visible translated headers
+  ];
 
   // Convert each history entry to CSV row
   for (const item of history) {

@@ -175,19 +175,47 @@ export const CalculationHistory: React.FC<CalculationHistoryProps> = ({
 
     if (history.length === 0) {
         return (
-            <Card shadow="sm" className="bg-default-50/50 border-dashed border-2 border-default-200">
-                <CardBody className="text-center py-12 flex flex-col items-center gap-3">
-                    <div className="p-4 bg-default-100 rounded-full">
-                        <History size={32} className="text-default-400" />
-                    </div>
-                    <div>
-                        <p className="text-lg font-semibold text-default-600">{t('history.empty')}</p>
-                        <p className="text-small text-default-400">
-                            {t('history.emptyDescription')}
-                        </p>
-                    </div>
-                </CardBody>
-            </Card>
+            <>
+                <Card shadow="sm" className="bg-default-50/50 border-dashed border-2 border-default-200">
+                    <CardBody className="text-center py-12 flex flex-col items-center gap-3">
+                        <div className="p-4 bg-default-100 rounded-full">
+                            <History size={32} className="text-default-400" />
+                        </div>
+                        <div>
+                            <p className="text-lg font-semibold text-default-600">{t('history.empty')}</p>
+                            <p className="text-small text-default-400">
+                                {t('history.emptyDescription')}
+                            </p>
+                        </div>
+                        <Button
+                            size="md"
+                            variant="flat"
+                            color="primary"
+                            startContent={<Upload size={18} />}
+                            onPress={() => fileInputRef.current?.click()}
+                            className="mt-2"
+                        >
+                            {t('history.import.button')}
+                        </Button>
+                        <input
+                            ref={fileInputRef}
+                            type="file"
+                            accept=".json,.csv"
+                            className="hidden"
+                            onChange={handleImportFile}
+                        />
+                    </CardBody>
+                </Card>
+
+                {/* Import Merge Strategy Modal */}
+                <ImportMergeModal
+                    isOpen={isMergeModalOpen}
+                    onOpenChange={onMergeModalOpenChange}
+                    importedData={importedData || []}
+                    existingData={history}
+                    onConfirm={handleConfirmImport}
+                />
+            </>
         );
     }
 
