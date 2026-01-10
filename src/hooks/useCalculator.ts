@@ -3,6 +3,20 @@ import type { CalculationState, CalculationResult } from '../types/calculator';
 
 export const useCalculator = (state: CalculationState): CalculationResult => {
   // Pre-calculate custom expenses total to avoid recalculating when array reference changes
+  // Split expenses into those included in base cost and those added to final price
+  const { baseExpenses, feeExpenses } = useMemo(
+    () => {
+      const baseExpenses = state.customExpenses
+        .filter(exp => exp.includeInFee)
+        .reduce((sum, expense) => sum + expense.amount, 0);
+      const feeExpenses = state.customExpenses
+        .filter(exp => !exp.includeInFee)
+        .reduce((sum, expense) => sum + expense.amount, 0);
+      return { baseExpenses, feeExpenses };
+    },
+    [state.customExpenses]
+  );
+
   const customExpensesCost = useMemo(
     () => state.customExpenses.reduce((sum, expense) => sum + expense.amount, 0),
     [state.customExpenses]
@@ -45,11 +59,13 @@ export const useCalculator = (state: CalculationState): CalculationResult => {
     const consumablesCost = state.consumables;
 
     // 8. Кастомні додаткові витрати (pre-calculated above)
+    // Base expenses (includeInFee = true) are added to subtotal and affected by failure rate/markup
+    // Fee expenses (includeInFee = false) are added to final price as static values
 
     // Підсумок всіх компонентів (без врахування вартості праці)
     const subtotal =
       materialCost + electricityCost + depreciationCost + nozzleWearCost +
-      bedWearCost + consumablesCost + customExpensesCost;
+      bedWearCost + consumablesCost + baseExpenses;
 
     // Собівартість (з урахуванням браку)
     // TotalCost = subtotal + (subtotal × failureRate / 100)
@@ -59,9 +75,10 @@ export const useCalculator = (state: CalculationState): CalculationResult => {
       : subtotal;
 
     // Фінальна ціна (з націнкою + вартість праці додається окремо, без множення на markup)
-    // Price = (TotalCost × (markup/100)) + laborCost
+    // Price = (TotalCost × (markup/100)) + laborCost + feeExpenses
     // markup is in percentage, e.g., 100 = 100% = 1x (no markup), 200 = 200% = 2x
-    const finalPrice = totalCost * (state.markup / 100) + laborCost;
+    // feeExpenses (includeInFee = false) are added to final price as static values
+    const finalPrice = totalCost * (state.markup / 100) + laborCost + feeExpenses;
 
     // Чистий прибуток
     const profit = finalPrice - totalCost;
@@ -106,6 +123,7 @@ export const useCalculator = (state: CalculationState): CalculationResult => {
     state.failureRate,
     state.markup,
     state.includeOlxFee,
-    customExpensesCost,
+    baseExpenses,
+    feeExpenses,
   ]);
 };

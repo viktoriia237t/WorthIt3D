@@ -100,6 +100,7 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({
             id: `exp-${Date.now()}`,
             name: '',
             amount: 0,
+            includeInFee: false,
         };
         const newState = {
             ...state,
@@ -109,7 +110,7 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({
         onStateChange(newState);
     };
 
-    const handleUpdateCustomExpense = (id: string, field: 'name' | 'amount', value: string | number) => {
+    const handleUpdateCustomExpense = (id: string, field: 'name' | 'amount' | 'includeInFee', value: string | number | boolean) => {
         const newState = {
             ...state,
             customExpenses: state.customExpenses.map(exp =>
@@ -465,35 +466,44 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({
                 >
                     <div className="flex flex-col gap-3" onFocus={(e) => e.stopPropagation()}>
                         {state.customExpenses.map((expense) => (
-                            <div key={expense.id} className="grid grid-cols-1 md:grid-cols-[1fr_150px_auto] gap-3 items-end">
-                                <Input
-                                    type="text"
-                                    variant="flat"
-                                    label={t('form.additional.expenseName')}
-                                    labelPlacement="outside"
-                                    placeholder={t('form.additional.expenseName')}
-                                    value={expense.name}
-                                    onChange={(e) => handleUpdateCustomExpense(expense.id, 'name', e.target.value)}
-                                />
-                                <NumberInput
-                                    variant="flat"
-                                    label={t('form.additional.expenseAmount')}
-                                    labelPlacement="outside"
-                                    placeholder="0"
-                                    endContent={<span className="text-tiny text-default-400">{t('units.uah')}</span>}
-                                    value={expense.amount}
-                                    onChange={(value) => handleUpdateCustomExpense(expense.id, 'amount', value)}
-                                    min={0}
-                                />
-                                <Button
-                                    isIconOnly
-                                    color="danger"
-                                    variant="flat"
-                                    size="lg"
-                                    onPress={() => handleRemoveCustomExpense(expense.id)}
+                            <div key={expense.id} className="flex flex-col gap-3 p-4 rounded-lg border border-default-200 bg-default-50">
+                                <div className="grid grid-cols-1 md:grid-cols-[1fr_150px_auto] gap-3 items-end">
+                                    <Input
+                                        type="text"
+                                        variant="flat"
+                                        label={t('form.additional.expenseName')}
+                                        labelPlacement="outside"
+                                        placeholder={t('form.additional.expenseName')}
+                                        value={expense.name}
+                                        onChange={(e) => handleUpdateCustomExpense(expense.id, 'name', e.target.value)}
+                                    />
+                                    <NumberInput
+                                        variant="flat"
+                                        label={t('form.additional.expenseAmount')}
+                                        labelPlacement="outside"
+                                        placeholder="0"
+                                        endContent={<span className="text-tiny text-default-400">{t('units.uah')}</span>}
+                                        value={expense.amount}
+                                        onChange={(value) => handleUpdateCustomExpense(expense.id, 'amount', value)}
+                                        min={0}
+                                    />
+                                    <Button
+                                        isIconOnly
+                                        color="danger"
+                                        variant="flat"
+                                        size="lg"
+                                        onPress={() => handleRemoveCustomExpense(expense.id)}
+                                    >
+                                        <Trash2 size={18} />
+                                    </Button>
+                                </div>
+                                <Switch
+                                    size="sm"
+                                    isSelected={expense.includeInFee}
+                                    onValueChange={(value) => handleUpdateCustomExpense(expense.id, 'includeInFee', value)}
                                 >
-                                    <Trash2 size={18} />
-                                </Button>
+                                    <span className="text-small">{t('form.additional.includeInFee')}</span>
+                                </Switch>
                             </div>
                         ))}
                         <Button

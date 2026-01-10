@@ -162,7 +162,8 @@
       "customExpenses": "Custom Expenses",
       "addExpense": "Add Expense",
       "expenseName": "Expense name",
-      "expenseAmount": "Amount ($)"
+      "expenseAmount": "Amount ($)",
+      "includeInFee": "Include in base cost (affected by failure rate and markup)"
     }
   },
   "result": {

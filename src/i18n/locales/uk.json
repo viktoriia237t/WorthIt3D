@@ -162,7 +162,8 @@
       "customExpenses": "Кастомні витрати",
       "addExpense": "Додати витрату",
       "expenseName": "Назва витрати",
-      "expenseAmount": "Сума (₴)"
+      "expenseAmount": "Сума (₴)",
+      "includeInFee": "Включити у базову вартість (з урахуванням браку та націнки)"
     }
   },
   "result": {

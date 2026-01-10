@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useMemo } from 'react';
+import { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import {Card, CardBody, } from "@heroui/card";
 import { Button, ButtonGroup } from "@heroui/button";
@@ -15,19 +15,11 @@ import { LanguageSwitcher } from './components/LanguageSwitcher';
 import { GitHubLink } from './components/GitHubLink';
 import { useCalculator } from './hooks/useCalculator';
 import { useCalculationHistory } from './hooks/useCalculationHistory';
+import { useCalculationManager } from './hooks/useCalculationManager';
+import { useSaveManager } from './hooks/useSaveManager';
 import { useSeoMeta } from './hooks/useSeoMeta';
-import { useDebouncedEffect } from './hooks/useDebouncedEffect';
-import { DEFAULT_CALCULATION_STATE } from './types/calculator';
-import type { CalculationState } from './types/calculator';
 import Logo from '../src/components/Logo';
 import { initGA, logPageView, logEvent } from './utils/analytics';
-
-
-const CURRENT_MODEL_STORAGE_KEY = 'current-model-info';
-const CURRENT_STATE_STORAGE_KEY = 'current-calculator-state';
-const EDITING_ID_STORAGE_KEY = 'current-editing-id';
-const AUTO_SAVE_ID_STORAGE_KEY = 'current-auto-save-id';
-const LAST_SAVE_TIME_STORAGE_KEY = 'last-save-time';
 
 function App() {
   const { t, i18n } = useTranslation();
@@ -50,328 +42,122 @@ function App() {
   // Update SEO meta tags when language changes
   useSeoMeta();
 
-  const [currentState, setCurrentState] = useState<CalculationState>(() => {
-    try {
-      const stored = localStorage.getItem(CURRENT_STATE_STORAGE_KEY);
-      if (stored) {
-        return JSON.parse(stored);
-      }
-    } catch (error) {
-      console.error('Failed to load current state:', error);
-    }
-    return DEFAULT_CALCULATION_STATE;
-  });
-
-  const [modelName, setModelName] = useState('');
-  const [modelLink, setModelLink] = useState('');
-  const [note, setNote] = useState('');
-  const [editingId, setEditingId] = useState<string | null>(() => {
-    try {
-      return localStorage.getItem(EDITING_ID_STORAGE_KEY);
-    } catch (error) {
-      console.error('Failed to load editing ID:', error);
-      return null;
-    }
-  });
+  // Tab state
   const [activeTab, setActiveTab] = useState<string>('calculator');
 
-  // Auto-save state
-  const [autoSaveId, setAutoSaveId] = useState<string | null>(() => {
-    try {
-      return localStorage.getItem(AUTO_SAVE_ID_STORAGE_KEY);
-    } catch (error) {
-      console.error('Failed to load auto-save ID:', error);
-      return null;
-    }
-  });
-  const [lastSaveTime, setLastSaveTime] = useState<number | null>(() => {
-    try {
-      const stored = localStorage.getItem(LAST_SAVE_TIME_STORAGE_KEY);
-      return stored ? parseInt(stored, 10) : null;
-    } catch (error) {
-      console.error('Failed to load last save time:', error);
-      return null;
-    }
-  });
-  const [isSaving, setIsSaving] = useState(false);
-  const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
-  const isInitialMount = useRef(true);
-  const skipNextAutoSave = useRef(false);
+  // Calculation manager hook - handles form state and localStorage
+  const calculationManager = useCalculationManager();
+  const {
+    currentState,
+    setCurrentState,
+    modelName,
+    setModelName,
+    modelLink,
+    setModelLink,
+    note,
+    setNote,
+    editingId,
+    setEditingId,
+    isEmptyForm,
+    loadCalculation,
+    clearForm,
+    cancelEdit,
+  } = calculationManager;
 
-  // Завантаження назви та посилання моделі з localStorage при монтуванні
-  useEffect(() => {
-    try {
-      const stored = localStorage.getItem(CURRENT_MODEL_STORAGE_KEY);
-      if (stored) {
-        const { modelName: savedName, modelLink: savedLink } = JSON.parse(stored);
-        setModelName(savedName || '');
-        setModelLink(savedLink || '');
-      }
-    } catch (error) {
-      console.error('Failed to load current model info:', error);
-    }
-  }, []);
-
-  // Збереження назви та посилання моделі в localStorage при зміні
-  useEffect(() => {
-    try {
-      localStorage.setItem(CURRENT_MODEL_STORAGE_KEY, JSON.stringify({ modelName, modelLink }));
-    } catch (error) {
-      console.error('Failed to save current model info:', error);
-    }
-  }, [modelName, modelLink]);
-
-  // Збереження стану калькулятора в localStorage при зміні
-  useEffect(() => {
-    try {
-      localStorage.setItem(CURRENT_STATE_STORAGE_KEY, JSON.stringify(currentState));
-    } catch (error) {
-      console.error('Failed to save current state:', error);
-    }
-  }, [currentState]);
-
-  // Збереження editingId в localStorage при зміні
-  useEffect(() => {
-    try {
-      if (editingId) {
-        localStorage.setItem(EDITING_ID_STORAGE_KEY, editingId);
-      } else {
-        localStorage.removeItem(EDITING_ID_STORAGE_KEY);
-      }
-    } catch (error) {
-      console.error('Failed to save editing ID:', error);
-    }
-  }, [editingId]);
-
-  // Збереження autoSaveId в localStorage при зміні
-  useEffect(() => {
-    try {
-      if (autoSaveId) {
-        localStorage.setItem(AUTO_SAVE_ID_STORAGE_KEY, autoSaveId);
-      } else {
-        localStorage.removeItem(AUTO_SAVE_ID_STORAGE_KEY);
-      }
-    } catch (error) {
-      console.error('Failed to save auto-save ID:', error);
-    }
-  }, [autoSaveId]);
-
-  // Збереження lastSaveTime в localStorage при зміні
-  useEffect(() => {
-    try {
-      if (lastSaveTime) {
-        localStorage.setItem(LAST_SAVE_TIME_STORAGE_KEY, lastSaveTime.toString());
-      } else {
-        localStorage.removeItem(LAST_SAVE_TIME_STORAGE_KEY);
-      }
-    } catch (error) {
-      console.error('Failed to save last save time:', error);
-    }
-  }, [lastSaveTime]);
-
-  const result = useCalculator(currentState);
+  // History hook
   const { history, addCalculation, deleteCalculation, updateCalculation, clearHistory, getCalculation, upsertCalculation, togglePin, importHistory } = useCalculationHistory();
 
-  // Memoize empty form check to avoid expensive JSON.stringify on every render
-  const isEmptyForm = useMemo(
-    () => JSON.stringify(currentState) === JSON.stringify(DEFAULT_CALCULATION_STATE),
-    [currentState]
-  );
+  // Calculate result
+  const result = useCalculator(currentState);
 
-  // Track unsaved changes
-  useEffect(() => {
-    const hasContent = !isEmptyForm || !!modelName || !!modelLink || !!note;
-
-    // If we just saved (lastSaveTime exists), mark as saved
-    if (lastSaveTime && !isSaving) {
-      setHasUnsavedChanges(false);
-      return;
-    }
-
-    setHasUnsavedChanges(hasContent);
-  }, [isEmptyForm, modelName, modelLink, note, isSaving, lastSaveTime]);
-
-  // Auto-save calculator state to history (debounced)
-  useDebouncedEffect(
-    () => {
-      // Skip auto-save on initial mount
-      if (isInitialMount.current) {
-        isInitialMount.current = false;
-        return;
-      }
-
-      // Skip auto-save if flag is set (e.g., after Save and Create New)
-      if (skipNextAutoSave.current) {
-        skipNextAutoSave.current = false;
-        return;
-      }
-
-      // Check if we need to save RIGHT NOW (not when debounce was triggered)
-      // This prevents saving after manual save cleared the IDs
-      if (!hasUnsavedChanges) {
-        return;
-      }
-
-      // Don't auto-save if form is empty (all defaults) and no model info
-      if (isEmptyForm && !modelName && !modelLink && !note) {
-        return;
-      }
-
-      // Don't auto-save if already saving
-      if (isSaving) {
-        return;
-      }
-
-      // Perform auto-save
-      setIsSaving(true);
-      try {
-        const targetId = editingId || autoSaveId;
-        const savedId = upsertCalculation(
-          targetId,
-          currentState,
-          result,
-          note,
-          modelName,
-          modelLink
-        );
-
-        // Store the auto-save ID for future updates
-        if (!editingId) {
-          setAutoSaveId(savedId);
-        }
-
-        setLastSaveTime(Date.now());
-      } catch (error) {
-        console.error('Auto-save failed:', error);
-      } finally {
-        setIsSaving(false);
-      }
-    },
-    2000, // 2 second debounce delay
-    [currentState, modelName, modelLink, note, editingId, isSaving, upsertCalculation, isEmptyForm, autoSaveId, hasUnsavedChanges]
-  );
-
-  const handleSaveCalculation = () => {
-    // Don't save if form is empty (all defaults) and no model info
-    if (isEmptyForm && !modelName && !modelLink && !note) {
-      addToast({
-        title: t('toast.emptyForm'),
-        description: t('toast.emptyFormDescription'),
-        color: "warning",
-        variant: "flat",
-        timeout: 3000,
-      });
-      return;
-    }
-
-    // Prevent concurrent saves
-    if (isSaving) {
-      return;
-    }
-
-    setIsSaving(true);
-    try {
-      if (editingId) {
-        // Update existing entry (from edit mode)
-        updateCalculation(editingId, currentState, result, note, modelName, modelLink);
-        setEditingId(null);
-        setAutoSaveId(null); // Clear auto-save ID
-        logEvent('Calculation', 'update', 'edit_mode').catch(console.error);
-        addToast({
-          title: t('toast.updated'),
-          description: modelName || t('toast.updatedDescription'),
-          color: "success",
-          variant: "flat",
-          timeout: 3000,
-        });
-      } else if (autoSaveId) {
-        // User clicked "Save" on an auto-saved draft - update it
-        updateCalculation(autoSaveId, currentState, result, note, modelName, modelLink);
-        // Keep autoSaveId so subsequent saves update the same entry
-        logEvent('Calculation', 'save', 'update_draft').catch(console.error);
-        addToast({
-          title: t('toast.saved'),
-          description: modelName || t('toast.savedDescription'),
-          color: "success",
-          variant: "flat",
-          timeout: 3000,
-        });
-      } else {
-        // Create new entry (no auto-save draft exists)
-        const newId = addCalculation(currentState, result, note, modelName, modelLink);
-        // Set autoSaveId to prevent duplicate saves on multiple clicks
-        setAutoSaveId(newId);
-        logEvent('Calculation', 'save', 'new').catch(console.error);
-        addToast({
-          title: t('toast.saved'),
-          description: modelName || t('toast.savedDescription'),
-          color: "success",
-          variant: "flat",
-          timeout: 3000,
-        });
-      }
-      setNote('');
-      setLastSaveTime(Date.now());
-    } finally {
-      setIsSaving(false);
-    }
-  };
-
-  const handleSaveAndNew = () => {
-    // First, save the current calculation
-    handleSaveCalculation();
-
-    // Then clear the identifiers to prepare for a new calculation
-    // Keep all the current parameters (state, modelName, modelLink) but clear IDs
-    setEditingId(null);
-    setAutoSaveId(null);
-    setLastSaveTime(null);
-    setNote('');
-
-    // Skip the next auto-save since we just saved and nothing changed yet
-    skipNextAutoSave.current = true;
-
-    logEvent('Calculation', 'save_and_new', 'duplicate_params').catch(console.error);
-
+  // Toast callback for save manager
+  const handleToast = (toast: { title: string; description?: string; color: string }) => {
     addToast({
-      title: t('toast.saved'),
-      description: t('buttons.saveAndNew'),
-      color: "success",
+      title: toast.title,
+      description: toast.description,
+      color: toast.color as any,
       variant: "flat",
       timeout: 3000,
     });
   };
 
+  // Save manager hook - handles auto-save and manual save logic
+  const saveManager = useSaveManager(
+    {
+      currentState,
+      result,
+      modelName,
+      modelLink,
+      note,
+      editingId,
+      isEmptyForm,
+      upsertCalculation,
+      updateCalculation,
+      addCalculation,
+    },
+    handleToast,
+    handleToast
+  );
+
+  const {
+    autoSaveId,
+    setAutoSaveId,
+    lastSaveTime,
+    hasUnsavedChanges,
+    handleSave,
+    handleSaveAndNew,
+    clearSaveState,
+  } = saveManager;
+
+  // Handle edit calculation from history
   const handleEditCalculation = (id: string) => {
     const calculation = getCalculation(id);
     if (calculation) {
-      setCurrentState(calculation.state);
-      setNote(calculation.note || '');
-      setModelName(calculation.modelName || '');
-      setModelLink(calculation.modelLink || '');
-      setEditingId(id);
+      loadCalculation(id, calculation);
+      clearSaveState(); // Clear auto-save state when loading from history
       setActiveTab('calculator');
     }
   };
 
+  // Handle cancel edit
   const handleCancelEdit = () => {
-    setCurrentState(DEFAULT_CALCULATION_STATE);
-    setNote('');
-    setModelName('');
-    setModelLink('');
-    setEditingId(null);
-    setAutoSaveId(null); // Clear auto-save ID when canceling
-    setLastSaveTime(null); // Clear last save time
+    cancelEdit();
+    clearSaveState();
   };
 
+  // Handle new calculation
   const handleNewCalculation = () => {
-    setCurrentState(DEFAULT_CALCULATION_STATE);
+    clearForm();
+    clearSaveState();
+  };
+
+  // Wrapper for handleSave that includes analytics and note clearing
+  const handleSaveCalculation = () => {
+    const wasEditMode = !!editingId;
+    const hadAutoSave = !!autoSaveId;
+
+    handleSave();
+
+    // Analytics
+    if (wasEditMode) {
+      setAutoSaveId(editingId);  // Transfer ID so subsequent saves update same entry
+      setEditingId(null);
+      logEvent('Calculation', 'update', 'edit_mode').catch(console.error);
+    } else if (hadAutoSave) {
+      logEvent('Calculation', 'save', 'update_draft').catch(console.error);
+    } else {
+      logEvent('Calculation', 'save', 'new').catch(console.error);
+    }
+
+    // Clear note after save
     setNote('');
-    setModelName('');
-    setModelLink('');
-    setEditingId(null);
-    setAutoSaveId(null); // Clear auto-save ID when starting new calculation
-    setLastSaveTime(null); // Clear last save time
+  };
+
+  // Wrapper for handleSaveAndNew with analytics
+  const handleSaveAndNewWrapper = () => {
+    handleSaveAndNew();
+    setNote('');
+    logEvent('Calculation', 'save_and_new', 'duplicate_params').catch(console.error);
   };
 
   return (
@@ -484,7 +270,7 @@ function App() {
                     color="default"
                     variant="flat"
                     isIconOnly
-                    onPress={handleSaveAndNew}
+                    onPress={handleSaveAndNewWrapper}
                     aria-label={t('buttons.saveAndNew')}
                   >
                     <FilePlus size={18} />

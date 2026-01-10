@@ -44,6 +44,7 @@ export interface CustomExpense {
   id: string;
   name: string; // Назва витрати (пакування, доставка і т.д.)
   amount: number; // Сума (грн)
+  includeInFee: boolean; // Включити у базову вартість (з урахуванням браку та націнки)
 }
 
 export interface CalculationResult {
