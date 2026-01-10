@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
+import packageJson from '../package.json';
 import {Card, CardBody, } from "@heroui/card";
 import { Button, ButtonGroup } from "@heroui/button";
 import { Tabs, Tab } from "@heroui/tabs";
@@ -353,6 +354,9 @@ function App() {
           </p>
           <p className="mt-1">
             {t('footer.line2')}
+          </p>
+          <p className="mt-2 text-xs">
+            v{packageJson.version}
           </p>
         </footer>
         </div>
