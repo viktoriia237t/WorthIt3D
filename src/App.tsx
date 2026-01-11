@@ -157,6 +157,7 @@ function App() {
   // Wrapper for handleSaveAndNew with analytics
   const handleSaveAndNewWrapper = () => {
     handleSaveAndNew();
+    setEditingId(null);  // Clear edit mode so next save creates new record
     setNote('');
     logEvent('Calculation', 'save_and_new', 'duplicate_params').catch(console.error);
   };

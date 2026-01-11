@@ -261,12 +261,28 @@ export const useSaveManager = (
     onError,
   ]);
 
-  // Save and create new handler
+  // Save and create new handler - saves current item, then prepares for new one
   const handleSaveAndNew = useCallback(() => {
-    // First, save the current calculation
-    handleSave();
+    // Don't save if form is empty
+    if (isEmptyForm && !modelName && !modelLink && !note) {
+      onError?.({
+        title: 'Cannot save empty form',
+        description: 'Please fill in at least one field or add model information',
+        color: 'warning',
+      });
+      return;
+    }
 
-    // Then clear the identifiers to prepare for a new calculation
+    // Save current item (update if editing/has autoSaveId, otherwise create new)
+    if (editingId) {
+      updateCalculation(editingId, currentState, result, note, modelName, modelLink);
+    } else if (autoSaveId) {
+      updateCalculation(autoSaveId, currentState, result, note, modelName, modelLink);
+    } else {
+      addCalculation(currentState, result, note, modelName, modelLink);
+    }
+
+    // Clear identifiers to prepare for a NEW calculation on next save
     setAutoSaveId(null);
     setLastSaveTime(null);
 
@@ -275,10 +291,10 @@ export const useSaveManager = (
 
     onSaved?.({
       title: 'Calculation saved successfully!',
-      description: 'Save and Create New',
+      description: modelName || 'Added to history',
       color: 'success',
     });
-  }, [handleSave, onSaved]);
+  }, [isEmptyForm, modelName, modelLink, note, editingId, autoSaveId, currentState, result, updateCalculation, addCalculation, onSaved, onError]);
 
   // Clear save state (used when loading from history or canceling)
   const clearSaveState = useCallback(() => {
