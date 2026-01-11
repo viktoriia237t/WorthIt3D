@@ -40,6 +40,18 @@ interface CalculatorFormProps {
 }
 
 const ACCORDION_STATE_STORAGE_KEY = 'calculator-accordion-state';
+const ELECTRICITY_PERSISTENT_STORAGE_KEY = 'calculator-electricity-persistent';
+
+interface ElectricityPersistentState {
+    powerConsumption: number;
+    electricityTariff: number;
+    printerPrice: number;
+    lifespan: number;
+    nozzlePrice: number;
+    nozzleLifespan: number;
+    bedPrice: number;
+    bedLifespan: number;
+}
 
 export const CalculatorForm: React.FC<CalculatorFormProps> = ({
   initialState = DEFAULT_CALCULATION_STATE,
@@ -52,7 +64,25 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({
   onNoteChange,
 }) => {
     const { t, i18n } = useTranslation();
-    const [state, setState] = useState<CalculationState>(initialState);
+
+    // Load persistent electricity values from localStorage
+    const loadPersistentElectricity = (): Partial<ElectricityPersistentState> => {
+        try {
+            const stored = localStorage.getItem(ELECTRICITY_PERSISTENT_STORAGE_KEY);
+            if (stored) {
+                return JSON.parse(stored);
+            }
+        } catch (error) {
+            console.error('Failed to load persistent electricity values:', error);
+        }
+        return {};
+    };
+
+    const [state, setState] = useState<CalculationState>(() => {
+        // Merge persistent electricity values with initial state
+        const persistentValues = loadPersistentElectricity();
+        return { ...initialState, ...persistentValues };
+    });
 
     // Accordion state management with localStorage persistence
     const [expandedKeys, setExpandedKeys] = useState<Set<string>>(() => {
@@ -65,8 +95,8 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({
         } catch (error) {
             console.error('Failed to load accordion state:', error);
         }
-        // Default: all sections expanded
-        return new Set(['modelInfo', 'materials', 'time', 'electricity', 'business', 'additional']);
+        // Default: all sections expanded (electricity first)
+        return new Set(['modelInfo', 'electricity', 'materials', 'time', 'business', 'additional']);
     });
 
     // Persist accordion state to localStorage
@@ -79,9 +109,39 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({
     }, [expandedKeys]);
 
     // Синхронізація локального стану з initialState (для редагування)
+    // При завантаженні з історії зберігаємо персистентні значення електрики
     useEffect(() => {
-        setState(initialState);
+        const persistentValues = loadPersistentElectricity();
+        setState({ ...initialState, ...persistentValues });
     }, [initialState]);
+
+    // Persist electricity values to localStorage when they change
+    useEffect(() => {
+        try {
+            const persistentValues: ElectricityPersistentState = {
+                powerConsumption: state.powerConsumption,
+                electricityTariff: state.electricityTariff,
+                printerPrice: state.printerPrice,
+                lifespan: state.lifespan,
+                nozzlePrice: state.nozzlePrice,
+                nozzleLifespan: state.nozzleLifespan,
+                bedPrice: state.bedPrice,
+                bedLifespan: state.bedLifespan,
+            };
+            localStorage.setItem(ELECTRICITY_PERSISTENT_STORAGE_KEY, JSON.stringify(persistentValues));
+        } catch (error) {
+            console.error('Failed to save persistent electricity values:', error);
+        }
+    }, [
+        state.powerConsumption,
+        state.electricityTariff,
+        state.printerPrice,
+        state.lifespan,
+        state.nozzlePrice,
+        state.nozzleLifespan,
+        state.bedPrice,
+        state.bedLifespan,
+    ]);
 
     const handleChange = (field: keyof CalculationState, value: number) => {
         const newState = { ...state, [field]: value };
@@ -183,117 +243,17 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({
                     </div>
                 </AccordionItem>
 
-                {/* 1. МАТЕРІАЛИ */}
-                <AccordionItem
-                    key="materials"
-                    aria-label={`1. ${t('form.materials.title')}`}
-                    title={
-                        <div className="flex items-center gap-3">
-                            <div className="p-2 rounded-lg bg-default-100">
-                                <Package size={22} className="text-blue-500" />
-                            </div>
-                            <div>
-                                <h3 className="text-md font-bold leading-tight">{`1. ${t('form.materials.title')}`}</h3>
-                                <p className="text-tiny text-default-500 uppercase tracking-wider">{t('form.materials.title')}</p>
-                            </div>
-                        </div>
-                    }
-                >
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4" onFocus={(e) => e.stopPropagation()}>
-                        <NumberInput
-                            variant="flat"
-                            label={t('form.materials.weight')}
-                            labelPlacement="outside"
-                            placeholder="0.00"
-                            startContent={<Weight size={18} className="text-default-400" />}
-                            endContent={<span className="text-tiny text-default-400">{t('units.grams')}</span>}
-                            value={state.weight}
-                            onChange={(value) => handleChange('weight', value)}
-                            min={0}
-                        />
-                        <NumberInput
-                            variant="flat"
-                            label={t('form.materials.spoolPrice')}
-                            labelPlacement="outside"
-                            placeholder="800"
-                            startContent={<CircleDollarSign size={18} className="text-default-400" />}
-                            endContent={<span className="text-tiny text-default-400">{t('units.uah')}</span>}
-                            value={state.spoolPrice}
-                            onChange={(value) => handleChange('spoolPrice', value)}
-                            min={0}
-                        />
-                        <NumberInput
-                            className="md:col-span-2"
-                            variant="flat"
-                            label={t('form.materials.spoolWeight')}
-                            labelPlacement="outside"
-                            placeholder="1000"
-                            endContent={<span className="text-tiny text-default-400">{t('units.grams')}</span>}
-                            value={state.spoolWeight}
-                            onChange={(value) => handleChange('spoolWeight', value)}
-                            min={0}
-                        />
-                    </div>
-                </AccordionItem>
-
-                {/* 2. ЧАСОВІ ВИТРАТИ */}
-                <AccordionItem
-                    key="time"
-                    aria-label={`2. ${t('form.time.title')}`}
-                    title={
-                        <div className="flex items-center gap-3">
-                            <div className="p-2 rounded-lg bg-default-100">
-                                <Clock size={22} className="text-orange-500" />
-                            </div>
-                            <div>
-                                <h3 className="text-md font-bold leading-tight">{`2. ${t('form.time.title')}`}</h3>
-                                <p className="text-tiny text-default-500 uppercase tracking-wider">{t('form.time.title')}</p>
-                            </div>
-                        </div>
-                    }
-                >
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4" onFocus={(e) => e.stopPropagation()}>
-                        <NumberInput
-                            variant="flat"
-                            label={t('form.time.printTime')}
-                            labelPlacement="outside"
-                            value={state.printTime}
-                            onChange={(value) => handleChange('printTime', value)}
-                            endContent={<span className="text-tiny text-default-400">{t('units.hours')}</span>}
-                            min={0}
-                        />
-                        <NumberInput
-                            variant="flat"
-                            label={t('form.time.prepTime')}
-                            labelPlacement="outside"
-                            value={state.prepTime}
-                            onChange={(value) => handleChange('prepTime', value)}
-                            endContent={<span className="text-tiny text-default-400">{t('units.hours')}</span>}
-                            min={0}
-                        />
-                        <NumberInput
-                            variant="flat"
-                            label={t('form.time.postTime')}
-                            labelPlacement="outside"
-                            value={state.postTime}
-                            onChange={(value) => handleChange('postTime', value)}
-                            endContent={<span className="text-tiny text-default-400">{t('units.hours')}</span>}
-                            min={0}
-                        />
-                    </div>
-                </AccordionItem>
-
-                {/* 3. ЕЛЕКТРИКА ТА АМОРТИЗАЦІЯ */}
+                {/* 1. ЕЛЕКТРИКА ТА АМОРТИЗАЦІЯ */}
                 <AccordionItem
                     key="electricity"
-                    aria-label={`3. ${t('form.electricity.title')} & ${t('form.depreciation.title')}`}
+                    aria-label={`1. ${t('form.electricity.title')} & ${t('form.depreciation.title')}`}
                     title={
                         <div className="flex items-center gap-3">
                             <div className="p-2 rounded-lg bg-default-100">
                                 <Cpu size={22} className="text-purple-500" />
                             </div>
                             <div>
-                                <h3 className="text-md font-bold leading-tight">{`3. ${t('form.electricity.title')} & ${t('form.depreciation.title')}`}</h3>
+                                <h3 className="text-md font-bold leading-tight">{`1. ${t('form.electricity.title')} & ${t('form.depreciation.title')}`}</h3>
                                 <p className="text-tiny text-default-500 uppercase tracking-wider">{t('form.electricity.title')}</p>
                             </div>
                         </div>
@@ -364,6 +324,106 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({
                             labelPlacement="outside"
                             value={state.bedLifespan}
                             onChange={(value) => handleChange('bedLifespan', value)}
+                            min={0}
+                        />
+                    </div>
+                </AccordionItem>
+
+                {/* 2. МАТЕРІАЛИ */}
+                <AccordionItem
+                    key="materials"
+                    aria-label={`2. ${t('form.materials.title')}`}
+                    title={
+                        <div className="flex items-center gap-3">
+                            <div className="p-2 rounded-lg bg-default-100">
+                                <Package size={22} className="text-blue-500" />
+                            </div>
+                            <div>
+                                <h3 className="text-md font-bold leading-tight">{`2. ${t('form.materials.title')}`}</h3>
+                                <p className="text-tiny text-default-500 uppercase tracking-wider">{t('form.materials.title')}</p>
+                            </div>
+                        </div>
+                    }
+                >
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4" onFocus={(e) => e.stopPropagation()}>
+                        <NumberInput
+                            variant="flat"
+                            label={t('form.materials.weight')}
+                            labelPlacement="outside"
+                            placeholder="0.00"
+                            startContent={<Weight size={18} className="text-default-400" />}
+                            endContent={<span className="text-tiny text-default-400">{t('units.grams')}</span>}
+                            value={state.weight}
+                            onChange={(value) => handleChange('weight', value)}
+                            min={0}
+                        />
+                        <NumberInput
+                            variant="flat"
+                            label={t('form.materials.spoolPrice')}
+                            labelPlacement="outside"
+                            placeholder="800"
+                            startContent={<CircleDollarSign size={18} className="text-default-400" />}
+                            endContent={<span className="text-tiny text-default-400">{t('units.uah')}</span>}
+                            value={state.spoolPrice}
+                            onChange={(value) => handleChange('spoolPrice', value)}
+                            min={0}
+                        />
+                        <NumberInput
+                            className="md:col-span-2"
+                            variant="flat"
+                            label={t('form.materials.spoolWeight')}
+                            labelPlacement="outside"
+                            placeholder="1000"
+                            endContent={<span className="text-tiny text-default-400">{t('units.grams')}</span>}
+                            value={state.spoolWeight}
+                            onChange={(value) => handleChange('spoolWeight', value)}
+                            min={0}
+                        />
+                    </div>
+                </AccordionItem>
+
+                {/* 3. ЧАСОВІ ВИТРАТИ */}
+                <AccordionItem
+                    key="time"
+                    aria-label={`3. ${t('form.time.title')}`}
+                    title={
+                        <div className="flex items-center gap-3">
+                            <div className="p-2 rounded-lg bg-default-100">
+                                <Clock size={22} className="text-orange-500" />
+                            </div>
+                            <div>
+                                <h3 className="text-md font-bold leading-tight">{`3. ${t('form.time.title')}`}</h3>
+                                <p className="text-tiny text-default-500 uppercase tracking-wider">{t('form.time.title')}</p>
+                            </div>
+                        </div>
+                    }
+                >
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4" onFocus={(e) => e.stopPropagation()}>
+                        <NumberInput
+                            variant="flat"
+                            label={t('form.time.printTime')}
+                            labelPlacement="outside"
+                            value={state.printTime}
+                            onChange={(value) => handleChange('printTime', value)}
+                            endContent={<span className="text-tiny text-default-400">{t('units.hours')}</span>}
+                            min={0}
+                        />
+                        <NumberInput
+                            variant="flat"
+                            label={t('form.time.prepTime')}
+                            labelPlacement="outside"
+                            value={state.prepTime}
+                            onChange={(value) => handleChange('prepTime', value)}
+                            endContent={<span className="text-tiny text-default-400">{t('units.hours')}</span>}
+                            min={0}
+                        />
+                        <NumberInput
+                            variant="flat"
+                            label={t('form.time.postTime')}
+                            labelPlacement="outside"
+                            value={state.postTime}
+                            onChange={(value) => handleChange('postTime', value)}
+                            endContent={<span className="text-tiny text-default-400">{t('units.hours')}</span>}
                             min={0}
                         />
                     </div>
