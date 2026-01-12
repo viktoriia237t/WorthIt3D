@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 // Модульні імпорти HeroUI
 import { Input, Textarea } from '@heroui/input';
@@ -84,6 +84,11 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({
         return { ...initialState, ...persistentValues };
     });
 
+    // Track if we're in the middle of an update from the form itself
+    const isInternalUpdateRef = useRef(false);
+    // Track the last external state we received
+    const lastExternalStateRef = useRef(initialState);
+
     // Accordion state management with localStorage persistence
     const [expandedKeys, setExpandedKeys] = useState<Set<string>>(() => {
         try {
@@ -109,10 +114,23 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({
     }, [expandedKeys]);
 
     // Синхронізація локального стану з initialState (для редагування)
-    // При завантаженні з історії зберігаємо персистентні значення електрики
+    // Тільки якщо це зовнішня зміна (не від самої форми)
     useEffect(() => {
-        const persistentValues = loadPersistentElectricity();
-        setState({ ...initialState, ...persistentValues });
+        // Skip if this is an update triggered by our own form changes
+        if (isInternalUpdateRef.current) {
+            isInternalUpdateRef.current = false;
+            lastExternalStateRef.current = initialState;
+            return;
+        }
+
+        // Check if initialState actually changed externally
+        if (JSON.stringify(lastExternalStateRef.current) !== JSON.stringify(initialState)) {
+            // External change detected - this is a real load from history or edit
+            // Merge with persistent electricity values to preserve user settings
+            const persistentValues = loadPersistentElectricity();
+            setState({ ...initialState, ...persistentValues });
+            lastExternalStateRef.current = initialState;
+        }
     }, [initialState]);
 
     // Persist electricity values to localStorage when they change
@@ -146,12 +164,16 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({
     const handleChange = (field: keyof CalculationState, value: number) => {
         const newState = { ...state, [field]: value };
         setState(newState);
+        // Mark that this is an internal update so useEffect won't reset the state
+        isInternalUpdateRef.current = true;
         onStateChange(newState);
     };
 
     const handleBooleanChange = (field: keyof CalculationState, value: boolean) => {
         const newState = { ...state, [field]: value };
         setState(newState);
+        // Mark that this is an internal update so useEffect won't reset the state
+        isInternalUpdateRef.current = true;
         onStateChange(newState);
     };
 
@@ -167,6 +189,8 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({
             customExpenses: [...state.customExpenses, newExpense],
         };
         setState(newState);
+        // Mark that this is an internal update so useEffect won't reset the state
+        isInternalUpdateRef.current = true;
         onStateChange(newState);
     };
 
@@ -178,6 +202,8 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({
             ),
         };
         setState(newState);
+        // Mark that this is an internal update so useEffect won't reset the state
+        isInternalUpdateRef.current = true;
         onStateChange(newState);
     };
 
@@ -187,6 +213,8 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({
             customExpenses: state.customExpenses.filter(exp => exp.id !== id),
         };
         setState(newState);
+        // Mark that this is an internal update so useEffect won't reset the state
+        isInternalUpdateRef.current = true;
         onStateChange(newState);
     };
 
