@@ -157,8 +157,7 @@ function App() {
   // Wrapper for handleSaveAndNew with analytics
   const handleSaveAndNewWrapper = () => {
     handleSaveAndNew();
-    setEditingId(null);  // Clear edit mode so next save creates new record
-    setNote('');
+    clearForm();  // Reset form state (preserves electricity values)
     logEvent('Calculation', 'save_and_new', 'duplicate_params').catch(console.error);
   };
 

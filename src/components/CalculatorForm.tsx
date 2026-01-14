@@ -128,10 +128,18 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({
             // External change detected - this is a real load from history or edit
             // Merge with persistent electricity values to preserve user settings
             const persistentValues = loadPersistentElectricity();
-            setState({ ...initialState, ...persistentValues });
+            const mergedState = { ...initialState, ...persistentValues };
+            setState(mergedState);
             lastExternalStateRef.current = initialState;
+
+            // Notify parent about the merged state so calculations use correct values
+            // Use setTimeout to avoid updating state during render
+            setTimeout(() => {
+                isInternalUpdateRef.current = true;
+                onStateChange(mergedState);
+            }, 0);
         }
-    }, [initialState]);
+    }, [initialState, onStateChange]);
 
     // Persist electricity values to localStorage when they change
     useEffect(() => {

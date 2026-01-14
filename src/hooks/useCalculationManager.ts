@@ -5,6 +5,7 @@ import type { CalculationState } from '../types/calculator';
 const CURRENT_MODEL_STORAGE_KEY = 'current-model-info';
 const CURRENT_STATE_STORAGE_KEY = 'current-calculator-state';
 const EDITING_ID_STORAGE_KEY = 'current-editing-id';
+const ELECTRICITY_PERSISTENT_STORAGE_KEY = 'calculator-electricity-persistent';
 
 interface CalculationManagerState {
   // Calculator state
@@ -122,14 +123,27 @@ export const useCalculationManager = (): CalculationManagerState => {
     setEditingId(id);
   }, []);
 
-  // Clear form and reset to defaults
+  // Load persistent electricity values from localStorage
+  const loadPersistentElectricity = useCallback(() => {
+    try {
+      const stored = localStorage.getItem(ELECTRICITY_PERSISTENT_STORAGE_KEY);
+      if (stored) {
+        return JSON.parse(stored);
+      }
+    } catch (error) {
+    }
+    return {};
+  }, []);
+
+  // Clear form and reset to defaults (preserving persistent electricity values)
   const clearForm = useCallback(() => {
-    setCurrentState(DEFAULT_CALCULATION_STATE);
+    const persistentValues = loadPersistentElectricity();
+    setCurrentState({ ...DEFAULT_CALCULATION_STATE, ...persistentValues });
     setNote('');
     setModelName('');
     setModelLink('');
     setEditingId(null);
-  }, []);
+  }, [loadPersistentElectricity]);
 
   // Cancel edit mode and clear form
   const cancelEdit = useCallback(() => {
