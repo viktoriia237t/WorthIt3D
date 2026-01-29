@@ -130,11 +130,14 @@
       "title": "Time",
       "printTime": "Print duration (hours)",
       "prepTime": "Preparation time (hours)",
-      "postTime": "Post-processing time (hours)"
+      "postTime": "Post-processing time (hours)",
+      "dryTime": "Dry time (hours)",
+      "dryDuringPrint": "Dry during print"
     },
     "electricity": {
       "title": "Electricity",
       "powerConsumption": "Printer consumption (kW)",
+      "dryerConsumption": "Dryer consumption (kW)",
       "tariff": "Cost per 1 kWh ($)"
     },
     "depreciation": {
@@ -152,7 +155,7 @@
     },
     "business": {
       "title": "Business Parameters",
-      "failureRate": "Failed print margin (%)",
+      "failureRate": "Failure rate (%)",
       "markup": "Markup (%)",
       "includeOlxFee": "Include OLX fee (+2% + 20$)"
     },

@@ -44,6 +44,7 @@ const ELECTRICITY_PERSISTENT_STORAGE_KEY = 'calculator-electricity-persistent';
 
 interface ElectricityPersistentState {
     powerConsumption: number;
+    dryerConsumption: number;
     electricityTariff: number;
     printerPrice: number;
     lifespan: number;
@@ -101,7 +102,7 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({
             console.error('Failed to load accordion state:', error);
         }
         // Default: all sections expanded (electricity first)
-        return new Set(['modelInfo', 'electricity', 'materials', 'time', 'business', 'additional']);
+        return new Set(['modelInfo', 'electricity', 'amortisation', 'materials', 'time', 'business', 'additional']);
     });
 
     // Persist accordion state to localStorage
@@ -146,6 +147,7 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({
         try {
             const persistentValues: ElectricityPersistentState = {
                 powerConsumption: state.powerConsumption,
+                dryerConsumption: state.dryerConsumption,
                 electricityTariff: state.electricityTariff,
                 printerPrice: state.printerPrice,
                 lifespan: state.lifespan,
@@ -160,6 +162,7 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({
         }
     }, [
         state.powerConsumption,
+        state.dryerConsumption,
         state.electricityTariff,
         state.printerPrice,
         state.lifespan,
@@ -279,23 +282,23 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({
                     </div>
                 </AccordionItem>
 
-                {/* 1. ЕЛЕКТРИКА ТА АМОРТИЗАЦІЯ */}
+                {/* 1. ЕЛЕКТРИКА */}
                 <AccordionItem
                     key="electricity"
-                    aria-label={`1. ${t('form.electricity.title')} & ${t('form.depreciation.title')}`}
+                    aria-label={`1. ${t('form.electricity.title')}`}
                     title={
                         <div className="flex items-center gap-3">
                             <div className="p-2 rounded-lg bg-default-100">
-                                <Cpu size={22} className="text-purple-500" />
+                                <Zap size={22} className="text-yellow-500" />
                             </div>
                             <div>
-                                <h3 className="text-md font-bold leading-tight">{`1. ${t('form.electricity.title')} & ${t('form.depreciation.title')}`}</h3>
+                                <h3 className="text-md font-bold leading-tight">{`1. ${t('form.electricity.title')}`}</h3>
                                 <p className="text-tiny text-default-500 uppercase tracking-wider">{t('form.electricity.title')}</p>
                             </div>
                         </div>
                     }
                 >
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4" onFocus={(e) => e.stopPropagation()}>
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4" onFocus={(e) => e.stopPropagation()}>
                         <NumberInput
                             variant="flat"
                             label={t('form.electricity.powerConsumption')}
@@ -307,12 +310,41 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({
                         />
                         <NumberInput
                             variant="flat"
+                            label={t('form.electricity.dryerConsumption')}
+                            labelPlacement="outside"
+                            startContent={<Zap size={18} className="text-default-400" />}
+                            value={state.dryerConsumption}
+                            onChange={(value) => handleChange('dryerConsumption', value)}
+                            min={0}
+                        />
+                        <NumberInput
+                            variant="flat"
                             label={t('form.electricity.tariff')}
                             labelPlacement="outside"
                             value={state.electricityTariff}
                             onChange={(value) => handleChange('electricityTariff', value)}
                             min={0}
                         />
+                    </div>
+                </AccordionItem>
+
+                {/* 2. АМОРТИЗАЦІЯ */}
+                <AccordionItem
+                    key="amortisation"
+                    aria-label={`2. ${t('form.depreciation.title')}`}
+                    title={
+                        <div className="flex items-center gap-3">
+                            <div className="p-2 rounded-lg bg-default-100">
+                                <Wrench size={22} className="text-purple-500" />
+                            </div>
+                            <div>
+                                <h3 className="text-md font-bold leading-tight">{`2. ${t('form.depreciation.title')}`}</h3>
+                                <p className="text-tiny text-default-500 uppercase tracking-wider">{t('form.depreciation.title')}</p>
+                            </div>
+                        </div>
+                    }
+                >
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4" onFocus={(e) => e.stopPropagation()}>
                         <NumberInput
                             variant="flat"
                             label={t('form.depreciation.printerPrice')}
@@ -365,17 +397,17 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({
                     </div>
                 </AccordionItem>
 
-                {/* 2. МАТЕРІАЛИ */}
+                {/* 3. МАТЕРІАЛИ */}
                 <AccordionItem
                     key="materials"
-                    aria-label={`2. ${t('form.materials.title')}`}
+                    aria-label={`3. ${t('form.materials.title')}`}
                     title={
                         <div className="flex items-center gap-3">
                             <div className="p-2 rounded-lg bg-default-100">
                                 <Package size={22} className="text-blue-500" />
                             </div>
                             <div>
-                                <h3 className="text-md font-bold leading-tight">{`2. ${t('form.materials.title')}`}</h3>
+                                <h3 className="text-md font-bold leading-tight">{`3. ${t('form.materials.title')}`}</h3>
                                 <p className="text-tiny text-default-500 uppercase tracking-wider">{t('form.materials.title')}</p>
                             </div>
                         </div>
@@ -418,63 +450,85 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({
                     </div>
                 </AccordionItem>
 
-                {/* 3. ЧАСОВІ ВИТРАТИ */}
+                {/* 4. ЧАСОВІ ВИТРАТИ */}
                 <AccordionItem
                     key="time"
-                    aria-label={`3. ${t('form.time.title')}`}
+                    aria-label={`4. ${t('form.time.title')}`}
                     title={
                         <div className="flex items-center gap-3">
                             <div className="p-2 rounded-lg bg-default-100">
                                 <Clock size={22} className="text-orange-500" />
                             </div>
                             <div>
-                                <h3 className="text-md font-bold leading-tight">{`3. ${t('form.time.title')}`}</h3>
+                                <h3 className="text-md font-bold leading-tight">{`4. ${t('form.time.title')}`}</h3>
                                 <p className="text-tiny text-default-500 uppercase tracking-wider">{t('form.time.title')}</p>
                             </div>
                         </div>
                     }
                 >
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4" onFocus={(e) => e.stopPropagation()}>
-                        <NumberInput
-                            variant="flat"
-                            label={t('form.time.printTime')}
-                            labelPlacement="outside"
-                            value={state.printTime}
-                            onChange={(value) => handleChange('printTime', value)}
-                            endContent={<span className="text-tiny text-default-400">{t('units.hours')}</span>}
-                            min={0}
-                        />
-                        <NumberInput
-                            variant="flat"
-                            label={t('form.time.prepTime')}
-                            labelPlacement="outside"
-                            value={state.prepTime}
-                            onChange={(value) => handleChange('prepTime', value)}
-                            endContent={<span className="text-tiny text-default-400">{t('units.hours')}</span>}
-                            min={0}
-                        />
-                        <NumberInput
-                            variant="flat"
-                            label={t('form.time.postTime')}
-                            labelPlacement="outside"
-                            value={state.postTime}
-                            onChange={(value) => handleChange('postTime', value)}
-                            endContent={<span className="text-tiny text-default-400">{t('units.hours')}</span>}
-                            min={0}
-                        />
+                    <div className="flex flex-col gap-4" onFocus={(e) => e.stopPropagation()}>
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                            <NumberInput
+                                variant="flat"
+                                label={t('form.time.printTime')}
+                                labelPlacement="outside"
+                                value={state.printTime}
+                                onChange={(value) => handleChange('printTime', value)}
+                                endContent={<span className="text-tiny text-default-400">{t('units.hours')}</span>}
+                                min={0}
+                            />
+                            <NumberInput
+                                variant="flat"
+                                label={t('form.time.prepTime')}
+                                labelPlacement="outside"
+                                value={state.prepTime}
+                                onChange={(value) => handleChange('prepTime', value)}
+                                endContent={<span className="text-tiny text-default-400">{t('units.hours')}</span>}
+                                min={0}
+                            />
+                            <NumberInput
+                                variant="flat"
+                                label={t('form.time.postTime')}
+                                labelPlacement="outside"
+                                value={state.postTime}
+                                onChange={(value) => handleChange('postTime', value)}
+                                endContent={<span className="text-tiny text-default-400">{t('units.hours')}</span>}
+                                min={0}
+                            />
+                        </div>
+                        <div className="grid grid-cols-1 md:grid-cols-[1fr_auto] gap-4 items-baseline">
+                            <NumberInput
+                                variant="flat"
+                                label={t('form.time.dryTime')}
+                                labelPlacement="outside"
+                                value={state.dryTime}
+                                onChange={(value) => handleChange('dryTime', value)}
+                                endContent={<span className="text-tiny text-default-400">{t('units.hours')}</span>}
+                                min={0}
+                                isDisabled={state.dryDuringPrint}
+                            />
+                            <Switch
+                                isSelected={state.dryDuringPrint}
+                                onValueChange={(value) => handleBooleanChange('dryDuringPrint', value)}
+                            >
+                                <div className="flex flex-col gap-1">
+                                    {t('form.time.dryDuringPrint')}
+                                </div>
+                            </Switch>
+                        </div>
                     </div>
                 </AccordionItem>
 
                 <AccordionItem
                     key="business"
-                    aria-label={`4. ${t('form.business.title')}`}
+                    aria-label={`5. ${t('form.business.title')}`}
                     title={
                         <div className="flex items-center gap-3">
                             <div className="p-2 rounded-lg bg-default-100">
                                 <TrendingUp size={22} className="text-success-500" />
                             </div>
                             <div>
-                                <h3 className="text-md font-bold leading-tight">{`4. ${t('form.business.title')}`}</h3>
+                                <h3 className="text-md font-bold leading-tight">{`5. ${t('form.business.title')}`}</h3>
                                 <p className="text-tiny text-default-500 uppercase tracking-wider">{t('form.business.title')}</p>
                             </div>
                         </div>
@@ -547,14 +601,14 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({
 
                 <AccordionItem
                     key="additional"
-                    aria-label={`5. ${t('form.additional.title')}`}
+                    aria-label={`6. ${t('form.additional.title')}`}
                     title={
                         <div className="flex items-center gap-3">
                             <div className="p-2 rounded-lg bg-default-100">
                                 <PlusCircle size={22} className="text-amber-500" />
                             </div>
                             <div>
-                                <h3 className="text-md font-bold leading-tight">{`5. ${t('form.additional.title')}`}</h3>
+                                <h3 className="text-md font-bold leading-tight">{`6. ${t('form.additional.title')}`}</h3>
                                 <p className="text-tiny text-default-500 uppercase tracking-wider">{t('form.additional.customExpenses')}</p>
                             </div>
                         </div>

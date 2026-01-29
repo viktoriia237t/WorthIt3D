@@ -8,9 +8,12 @@ export interface CalculationState {
   printTime: number; // Тривалість друку (години)
   prepTime: number; // Час на підготовку (години)
   postTime: number; // Час на пост-обробку (години)
+  dryTime: number; // Час сушіння (години)
+  dryDuringPrint: boolean; // Сушіння під час друку
 
   // Електроенергія
   powerConsumption: number; // Споживання принтера (кВт)
+  dryerConsumption: number; // Споживання сушки (кВт)
   electricityTariff: number; // Вартість 1 кВт-год (грн)
 
   // Амортизація
@@ -90,9 +93,12 @@ export const DEFAULT_CALCULATION_STATE: CalculationState = {
   printTime: 0,
   prepTime: 0,
   postTime: 0,
+  dryTime: 0,
+  dryDuringPrint: false,
 
   // Електроенергія
   powerConsumption: 0,
+  dryerConsumption: 0,
   electricityTariff: 0,
 
   // Амортизація

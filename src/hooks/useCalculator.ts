@@ -35,9 +35,18 @@ export const useCalculator = (state: CalculationState): CalculationResult => {
     const materialCost = safeDivide(state.weight * state.spoolPrice, state.spoolWeight);
 
     // 2. Електроенергія (C_elec)
-    // C_elec = printTime × powerConsumption × electricityTariff
-    const electricityCost =
-      state.printTime * state.powerConsumption * state.electricityTariff;
+    // C_elec = printTime × powerConsumption × electricityTariff + effectiveDryTime × dryerConsumption × electricityTariff
+    // If dryDuringPrint is true, use printTime as dryTime
+    // If dryerConsumption is 0, skip dryer calculation entirely
+    const printerElectricityCost = state.printTime * state.powerConsumption * state.electricityTariff;
+
+    let dryerElectricityCost = 0;
+    if (state.dryerConsumption > 0) {
+      const effectiveDryTime = state.dryDuringPrint ? state.printTime : state.dryTime;
+      dryerElectricityCost = effectiveDryTime * state.dryerConsumption * state.electricityTariff;
+    }
+
+    const electricityCost = printerElectricityCost + dryerElectricityCost;
 
     // 3. Амортизація принтера (C_dep)
     // C_dep = (printerPrice / lifespan) × printTime
@@ -110,7 +119,10 @@ export const useCalculator = (state: CalculationState): CalculationResult => {
     state.printTime,
     state.prepTime,
     state.postTime,
+    state.dryTime,
+    state.dryDuringPrint,
     state.powerConsumption,
+    state.dryerConsumption,
     state.electricityTariff,
     state.printerPrice,
     state.lifespan,
