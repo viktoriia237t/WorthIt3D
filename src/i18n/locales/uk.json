@@ -229,6 +229,7 @@
     "uahPerHour": "₴/год",
     "kw": "кВт",
     "uahPerKwh": "₴/кВт⋅год",
-    "currencySymbol": "₴"
+    "currencySymbol": "₴",
+    "batch": "шт"
   }
 }

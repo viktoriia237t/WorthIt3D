@@ -279,18 +279,17 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({
                             value={modelLink}
                             onChange={(e) => onModelLinkChange?.(e.target.value)}
                         />
+                        <NumberInput
+                            variant="flat"
+                            label={t('form.modelInfo.batchCount')}
+                            labelPlacement="outside"
+                            placeholder="1"
+                            value={state.batchCount}
+                            onChange={(value) => handleChange('batchCount', Math.max(1, value))}
+                            min={1}
+                            description={t('form.modelInfo.batchCountDesc')}
+                        />
                     </div>
-                    <Divider className="my-4" />
-                    <NumberInput
-                        variant="flat"
-                        label={t('form.modelInfo.batchCount')}
-                        labelPlacement="outside"
-                        placeholder="1"
-                        value={state.batchCount}
-                        onChange={(value) => handleChange('batchCount', Math.max(1, value))}
-                        min={1}
-                        description={t('form.modelInfo.batchCountDesc')}
-                    />
                 </AccordionItem>
 
                 {/* 1. ЕЛЕКТРИКА */}

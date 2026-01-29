@@ -229,6 +229,7 @@
     "uahPerHour": "$/hr",
     "kw": "kW",
     "uahPerKwh": "$/kWh",
-    "currencySymbol": "$"
+    "currencySymbol": "$",
+    "batch": "pcs"
   }
 }

@@ -109,17 +109,19 @@ export const useCalculator = (state: CalculationState): CalculationResult => {
     // Фінальна ціна (з націнкою + вартість праці додається окремо, без множення на markup)
     // Price = (TotalCost × (markup/100)) + laborCost + feeExpenses
     // markup is in percentage, e.g., 100 = 100% = 1x (no markup), 200 = 200% = 2x
-    // feeExpenses (includeInFee = false) are added to final price as static values
+    // feeExpenses (includeInFee = false) are added to final price as pass-through costs
     const finalPrice = totalCost * (normalizedState.markup / 100) + laborCost + feeExpenses;
 
     // Чистий прибуток
-    const profit = finalPrice - totalCost;
+    // Profit = finalPrice - totalCost - laborCost
+    // Note: feeExpenses (includeInFee=false) are NOT subtracted - they're pass-through to customer
+    const profit = finalPrice - totalCost - laborCost;
 
     // OLX calculations - supports both per-item and batch commission modes
     const olxFeePerItem = normalizedState.olxFeePerItem ?? true; // Default to per-item for backward compatibility
     const olxPrice = normalizedState.includeOlxFee
       ? (isBatchMode && olxFeePerItem
-          ? (finalPrice / effectiveBatchCount) * 1.02 + 20 * effectiveBatchCount  // Per-item commission × count
+          ? ((finalPrice / effectiveBatchCount) * 1.02 + 20) * effectiveBatchCount  // Per-item commission: (price/count × 1.02 + 20) × count
           : finalPrice * 1.02 + 20)  // Single commission (for batch or single item)
       : 0;
     const olxProfit = normalizedState.includeOlxFee ? olxPrice - totalCost : 0;

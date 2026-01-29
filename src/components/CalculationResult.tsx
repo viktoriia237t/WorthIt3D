@@ -53,14 +53,6 @@ export const CalculationResultComponent: React.FC<CalculationResultProps> = ({
                 </div>
             </CardHeader>
 
-            {batchCount > 1 && (
-                <div className="px-6 pt-2">
-                    <Chip size="sm" variant="flat" color="secondary" className="font-semibold">
-                        {t('result.batchMode', { count: batchCount })}
-                    </Chip>
-                </div>
-            )}
-
             <Divider />
 
             <CardBody className="gap-6 px-6 py-4">
@@ -121,7 +113,11 @@ export const CalculationResultComponent: React.FC<CalculationResultProps> = ({
                     {result.olxPrice > 0 && i18n.language === 'uk' && (
                         <CostRow
                             icon={<Package size={16} />}
-                            label="OLX (+2% + 20₴)"
+                            label={batchCount > 1
+                                ? (olxFeePerItem
+                                    ? `Комісія OLX (${batchCount} × 20₴ + 2%)`
+                                    : 'Комісія OLX (набір)')
+                                : 'Комісія OLX (+2% + 20₴)'}
                             value={formatCurrency(result.olxPrice - result.finalPrice)}
                         />
                     )}
@@ -226,9 +222,11 @@ export const CalculationResultComponent: React.FC<CalculationResultProps> = ({
                                 )}
 
                                 <p className="text-[11px] opacity-80 font-medium">
-                                    {batchCount > 1 && olxFeePerItem
-                                        ? `OLX: (+2% + 20₴) × ${batchCount} шт.`
-                                        : 'OLX: +2% + 20₴'}
+                                    {batchCount > 1
+                                        ? (olxFeePerItem
+                                            ? `Комісія за кожну: (+2% + 20₴) × ${batchCount} шт.`
+                                            : `Комісія для набору: +2% + 20₴`)
+                                        : 'Комісія OLX: +2% + 20₴'}
                                 </p>
                             </div>
                         </div>

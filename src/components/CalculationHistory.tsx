@@ -330,7 +330,12 @@ export const CalculationHistory: React.FC<CalculationHistoryProps> = ({
                                             </div>
                                         </TableCell>
                                         <TableCell>
-                                            <div className="flex gap-1">
+                                            <div className="flex gap-1 flex-wrap">
+                                                {item.state.batchCount > 1 && (
+                                                    <Chip size="sm" variant="flat" color="secondary" startContent={<Layers size={12} className="ml-1" />}>
+                                                        {item.state.batchCount}× {t('units.batch')}
+                                                    </Chip>
+                                                )}
                                                 <Chip size="sm" variant="flat" startContent={<Layers size={12} className="ml-1" />}>
                                                     {item.state.weight}{t('units.grams')}
                                                 </Chip>
