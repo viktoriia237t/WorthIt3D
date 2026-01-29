@@ -5,7 +5,7 @@ import { forwardRef } from 'react';
 interface NumberInputProps {
   value: number;
   onChange: (value: number) => void;
-  label?: string;
+  label?: React.ReactNode;
   labelPlacement?: 'inside' | 'outside' | 'outside-left';
   placeholder?: string;
   variant?: 'flat' | 'bordered' | 'faded' | 'underlined';

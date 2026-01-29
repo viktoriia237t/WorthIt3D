@@ -1,7 +1,9 @@
 {
   "header": {
     "title": "3D Printing Cost Calculator",
-    "subtitle": "Simple 3D printing cost calculation tool"
+    "subtitle": "Simple 3D printing cost calculation tool",
+    "changelog": "Changelog",
+    "help": "Help"
   },
   "alert": {
     "development": {
@@ -120,7 +122,8 @@
       "note": "Note",
       "notePlaceholder": "Additional information",
       "batchCount": "Batch Count",
-      "batchCountDesc": "Number of identical models on plate (more than one enables batch mode)"
+      "batchCountDesc": "Number of identical models on plate (more than one enables batch mode)",
+      "batchCountTooltip": "Print multiple identical models in one session. Affects material weight and some costs."
     },
     "materials": {
       "title": "Materials",
@@ -143,7 +146,9 @@
       "title": "Electricity",
       "powerConsumption": "Printer consumption (kW)",
       "dryerConsumption": "Dryer consumption (kW)",
-      "tariff": "Cost per 1 kWh ($)"
+      "dryerConsumptionTooltip": "Power used by filament dryer. Leave at 0 if not using a dryer during print.",
+      "tariff": "Cost per 1 kWh ($)",
+      "dryDuringPrintTooltip": "ON: Dryer runs during print time. OFF: Dryer runs separately for specified hours."
     },
     "depreciation": {
       "title": "Depreciation",
@@ -161,7 +166,9 @@
     "business": {
       "title": "Business Parameters",
       "failureRate": "Failure rate (%)",
+      "failureRateTooltip": "Buffer for failed prints. 10% adds 10% to costs to cover occasional failures.",
       "markup": "Markup (%)",
+      "markupTooltip": "Your profit margin. 100% = break even, 200% = 2x your costs, 300% = 3x costs.",
       "includeOlxFee": "Include OLX fee (+2% + 20$)",
       "includeOlxFeeDesc": "Add OLX marketplace commission to final price",
       "olxFeePerItem": "Commission per item",
@@ -176,6 +183,7 @@
       "expenseName": "Expense name",
       "expenseAmount": "Amount ($)",
       "includeInFee": "Include in base cost (affected by failure rate and markup)",
+      "includeInFeeTooltip": "ON: Cost gets markup applied. OFF: Added directly to price without markup.",
       "perItem": "Calculate per item",
       "perItemDesc": "This expense will be multiplied by batch count (e.g., keychain ring for each item)",
       "perBatchDesc": "This expense applies to entire batch (e.g., shipping box for all items)"
@@ -231,5 +239,60 @@
     "uahPerKwh": "$/kWh",
     "currencySymbol": "$",
     "batch": "pcs"
+  },
+  "changelog": {
+    "title": "What's New",
+    "version": "Version",
+    "versions": {
+      "0.1.3": {
+        "date": "January 29, 2026",
+        "changes": [
+          "Added batch mode for printing multiple models simultaneously",
+          "Added OLX commission per-item toggle for individual sales",
+          "Added count display in history table for batch tracking",
+          "Fixed OLX commission calculation formula for batch mode",
+          "Fixed profit calculation after all expenses",
+          "Added filament dryer parameters with electricity calculation",
+          "Improved UI for custom expenses with batch mode support"
+        ]
+      }
+    }
+  },
+  "help": {
+    "title": "Calculator Guide",
+    "sections": {
+      "modelInfo": {
+        "title": "Model Information",
+        "content": "📦 BASIC MODEL PARAMETERS\n\n• Weight (grams): Total plastic weight needed for the model including supports. Measured in grams.\n  → Affects: Material cost directly\n  → How to measure: Use slicer software (Cura, PrusaSlicer) for accurate calculation\n\n• Print Time (hours): Total time the printer spends printing the model.\n  → Affects: Electricity and equipment depreciation\n  → Important: Take time from slicer + 10-15% safety margin\n\n• Batch Mode: Printing multiple identical models at once.\n  → Benefits: Time savings on prep, efficient bed usage\n  → How it works: Weight can be per model (with multiplication) or for entire batch\n  → Example: 5 keychains at 10g = 50g total\n\n• Weight Per Model (toggle):\n  → ON: Entered weight will be multiplied by batch count automatically\n  → OFF: Entered weight already accounts for entire batch"
+      },
+      "materials": {
+        "title": "Material Costs",
+        "content": "💰 MATERIAL COST CALCULATION\n\nFormula: (model weight ÷ spool weight) × spool price\n\n• Spool Price: What you paid for the filament spool\n  → Standard weights: 1000g (1kg), 500g, 250g\n  → Tip: Include shipping cost in spool price calculation\n\n• Spool Economics: Understanding true material cost\n  → Example: 1kg spool for $20 = $0.02 per gram\n  → 50g model = 50 × 0.02 = $1.00 for material\n\n• Measurement Accuracy:\n  → Use slicer weight, not CAD model weight\n  → Don't forget supports (add 10-30% to weight)\n  → Brim and other helper elements also have weight\n\n• Different Materials:\n  → PLA: Cheapest, standard choice\n  → PETG: Slightly more expensive, stronger\n  → ABS, Nylon: Specialty materials, higher cost"
+      },
+      "time": {
+        "title": "Time & Labor",
+        "content": "⏱️ THREE TIME TYPES\n\n1. Preparation Time (before print):\n   • Bed preparation (cleaning, applying glue)\n   • Loading and configuring file\n   • Calibration if needed\n   → Typical: 10-15 minutes (0.17-0.25 hrs)\n\n2. Print Time (during):\n   • Actual printer running time\n   • Affects electricity and depreciation\n   → Important: Take from slicer, don't round down\n\n3. Post-processing Time (after print):\n   • Removing model from bed\n   • Removing supports\n   • Sanding, painting (if needed)\n   → Typical: 15-30 minutes (0.25-0.5 hrs) depending on complexity\n\n💼 LABOR PAYMENT\n\n• Hourly Rate: What your time is worth\n  → Consider: Your skills, experience, market\n  → Minimum: Cover operational costs\n  → Optimal: Competitive rate for your region\n\n• How it's added to price:\n  → Preparation + Post-processing = Your active time\n  → Print time is NOT paid as active work\n  → This is the basis for calculating your labor cost\n\n⚡ ELECTRICITY CALCULATION\n\nFormula: print time × consumption (kW) × tariff\n\n• Printer Consumption:\n  → Ender 3: ~0.15-0.20 kW average\n  → Prusa i3: ~0.10-0.15 kW\n  → Large printers: 0.30-0.50 kW\n  → Tip: Measure with watt meter for accuracy\n\n• Filament Dryer:\n  → When to use: Hygroscopic materials (Nylon, PETG, TPU)\n  → Consumption: 50-150 W (0.05-0.15 kW)\n  → Modes:\n     - During print: Time = print time\n     - Separately: Specify drying time manually"
+      },
+      "electricity": {
+        "title": "Electricity",
+        "content": "⚡ ELECTRICITY CALCULATION\n\nFormula: time × consumption (kW) × tariff ($/kWh)\n\n• Printer Consumption:\n  → Measure real consumption with watt meter\n  → Don't confuse peak and average consumption\n  → Average consumption: during active printing\n\n• Typical Consumption Values:\n  → Ender 3: 0.15-0.20 kW (150-200 W)\n  → Prusa i3 MK3: 0.10-0.15 kW\n  → Artillery, Creality CR: 0.20-0.25 kW\n  → CoreXY large: 0.30-0.50 kW\n\n• Filament Dryer:\n  → When needed: PLA when humid, PETG, Nylon, TPU always\n  → Consumption: 50-150 W depending on model\n  → Sunlu S1: ~70 W\n  → Esun eBOX: ~100 W\n\n• Dryer Operation Modes:\n  → \"During print\": Dryer runs entire print time\n     - Time = print time\n     - Added to printer consumption\n  → \"Separately\": Pre-print or post-print drying\n     - Specify drying time manually\n     - Calculated separately\n\n• Tariff:\n  → Check current tariff with your provider\n  → Consider day/night rate difference (if applicable)\n  → USA 2026: ~$0.12-0.15/kWh average"
+      },
+      "depreciation": {
+        "title": "Depreciation & Wear",
+        "content": "📉 DEPRECIATION CONCEPT\n\nDepreciation is spreading equipment cost over its useful life.\nWhy it matters: You need to recover your equipment investment.\n\n🖨️ PRINTER DEPRECIATION\n\nFormula: (printer cost ÷ lifespan in hours) × print time\n\n• Example:\n  → Printer: $400\n  → Lifespan: 5000 hours\n  → Depreciation: $400 ÷ 5000 = $0.08 per hour\n  → 3-hour print: $0.08 × 3 = $0.24\n\n• Realistic Lifespan:\n  → Budget printers (Ender 3): 3000-5000 hrs\n  → Mid-range (Prusa, Artillery): 5000-8000 hrs\n  → Premium (Prusa XL, Bambu X1): 8000-12000 hrs\n\n🔧 NOZZLE WEAR\n\nFormula: (nozzle cost ÷ lifespan) × print time\n\n• Brass Nozzle:\n  → Cost: $2-5\n  → Lifespan: 500-1000 hrs (depends on filament abrasiveness)\n  → With PLA: ~1000 hrs, with fillers: ~200-300 hrs\n\n• Hardened Nozzle:\n  → Cost: $10-20\n  → Lifespan: 2000-5000 hrs\n  → For abrasive materials (carbon, metal, wood)\n\n🛏️ BED WEAR\n\nFormula: (bed cost ÷ lifespan) × print time\n\n• PEI Surface:\n  → Cost: $15-30\n  → Lifespan: 3000-5000 hrs or 500-1000 prints\n\n• Glass Bed:\n  → Cost: $10-20\n  → Lifespan: 2000-4000 hrs (depends on mechanical damage)\n\n• Magnetic Surface:\n  → Cost: $20-40\n  → Lifespan: 1500-3000 hrs (sensitive to high temps)\n\n💡 WHY THIS MATTERS\n\n• True Cost: Without depreciation you don't cover all expenses\n• Replacement Planning: Know when you'll save for new equipment\n• Competitiveness: Fair pricing that covers all costs\n• Scaling: Understand ROI when buying new printer"
+      },
+      "business": {
+        "title": "Business Parameters",
+        "content": "📊 MARKUP\n\nWhat it is: Your profit layer on top of cost, expressed as percentage.\n\nFormula: final price = cost × (1 + markup/100)\n\n• How it works:\n  → 100% = Break even (final price = cost × 2)\n  → 200% = Triple costs (final price = cost × 3)\n  → 300% = Quadruple costs (final price = cost × 4)\n\n• Examples:\n  → Cost: $10\n  → Markup 100%: $10 × 2.0 = $20 (profit $10)\n  → Markup 200%: $10 × 3.0 = $30 (profit $20)\n  → Markup 50%: $10 × 1.5 = $15 (profit $5)\n\n• Factors for Setting Markup:\n  → Market competition\n  → Model complexity\n  → Service uniqueness\n  → Turnaround time\n  → Your expertise level\n\n• Recommendations:\n  → Standard models: 100-150%\n  → Complex models: 150-250%\n  → Rush orders: 200-300%\n  → Custom design: 250-400%\n\n⚠️ FAILURE RATE\n\nWhat it is: Statistical buffer for prints that fail.\n\nFormula: cost with failures = base cost × (1 + failure/100)\n\n• How it works:\n  → 10% adds 10% to all costs\n  → Covers: Material, time, electricity for reprints\n  → Applied BEFORE markup\n\n• Example:\n  → Base cost: $10\n  → Failure 10%: $10 × 1.1 = $11\n  → Then markup 200%: $11 × 3.0 = $33\n\n• Recommended Values:\n  → Simple PLA: 5-10%\n  → Complex models: 10-15%\n  → Experimental materials: 15-25%\n  → TPU, Nylon: 20-30%\n\n• Risk Factors:\n  → Geometry complexity (many supports)\n  → Model height (adhesion risk)\n  → New material (insufficient experience)\n  → Long prints (more risk points)\n\n🔄 HOW THEY INTERACT\n\n1. Base cost (material + electricity + depreciation + labor)\n2. + Failure rate (statistical buffer)\n3. = Cost with risks\n4. × Markup = Final price\n5. - Cost = Your profit\n\nComplete calculation example:\n→ Base cost: $12\n→ Failure 10%: $12 × 1.1 = $13.20 (cost)\n→ Markup 150%: $13.20 × 2.5 = $33 (final price)\n→ Profit: $33 - $13.20 = $19.80"
+      },
+      "additional": {
+        "title": "Additional Costs",
+        "content": "➕ CUSTOM EXPENSES\n\nWhat it is: Project-specific costs not covered by base categories.\n\n• Typical Examples:\n  → Packaging (boxes, bubble wrap)\n  → Shipping (post, courier)\n  → Special materials (magnets, keychain rings)\n  → Painting (paints, varnish)\n  → Post-processing (putty, primer)\n\n🎚️ \"INCLUDE IN BASE COST\" TOGGLE\n\nImportant parameter affecting calculation:\n\n• ON (Include in Fee = ON):\n  → Expense becomes part of base cost\n  → Affected by failure rate\n  → Markup applied to it\n  → Use for: Production-related costs\n\n  Example: Magnets for each keychain ($2)\n  → With failure 10%: $2 × 1.1 = $2.20\n  → With markup 200%: $2.20 × 3.0 = $6.60 in final price\n  → Your profit accounts for this expense\n\n• OFF (Include in Fee = OFF):\n  → Expense added to final price directly\n  → No failure or markup\n  → Simply \"pass-through\" cost\n  → Use for: Costs you don't control\n\n  Example: Shipping via courier ($8)\n  → Simply added: final price + $8\n  → No profit on shipping\n  → Client pays exact cost\n\n📦 \"PER ITEM\" TOGGLE\n\nFor batch mode (more than 1 model):\n\n• ON (Per Item = ON):\n  → Expense multiplied by model count\n  → Each model needs this expense separately\n  \n  Example: Keychain ring $0.50, batch of 10\n  → Total expense: $0.50 × 10 = $5\n  → Use for: Fasteners, magnets, individual packaging\n\n• OFF (Per Item = OFF):\n  → Expense applies to entire batch\n  → One expense for all models together\n  \n  Example: Shipping box $3, batch of 10\n  → Total expense: $3 (regardless of count)\n  → Use for: Set packaging, batch shipping\n\n💡 USAGE STRATEGIES\n\n1. Production Costs (Include in Fee ON):\n   → Paints, varnish → with markup\n   → Special fasteners → with markup\n   → Magnets, screws → with markup\n\n2. Pass-through Costs (Include in Fee OFF):\n   → Shipping costs → without markup\n   → Bank fees → without markup\n   → Client expenses → without markup\n\n3. Combined Approach:\n   → Base box ($3) → OFF, per batch\n   → Magnet each ($0.50) → ON, per item\n   → Shipping ($8) → OFF, per batch"
+      },
+      "olx": {
+        "title": "OLX Commission",
+        "content": "🛒 OLX MARKETPLACE\n\nWhat it is: Popular marketplace in Ukraine for selling goods.\n\nOLX Commission Structure:\n→ 2% of item price\n→ + $0.80 fixed fee per transaction\n\n📊 TWO CALCULATION MODES\n\nYour mode choice depends on HOW you sell models:\n\n1️⃣ \"PER ITEM\" MODE (Per Item = ON)\n\nUse when: Selling each model as separate listing\n\nFormula: (model price × 1.02 + $0.80) × model count\n\nExample: Keychain $5, made 5 pcs, selling separately\n→ Commission for 1: $5 × 1.02 + $0.80 = $5.90\n→ Commission for 5: $5.90 × 5 = $29.50\n→ You receive: $29.50 from clients\n→ Net profit: $29.50 - ($5×5) = $4.50\n\nWhen to use:\n✓ Selling individually to different clients\n✓ 5 separate listings for 5 keychains\n✓ Each model - separate OLX transaction\n\n2️⃣ \"BATCH\" MODE (Per Item = OFF)\n\nUse when: Selling all models as one set\n\nFormula: (total price × 1.02) + $0.80\n\nExample: Set of 5 keychains, total price $25\n→ OLX commission: $25 × 1.02 + $0.80 = $26.30\n→ You receive: $26.30 from one client\n→ One transaction, one commission\n\nWhen to use:\n✓ Selling set to one client\n✓ One listing \"Set of 5 keychains\"\n✓ Single OLX transaction\n\n🎯 COMPARISON EXAMPLE\n\nScenario: 5 models at $5 each (total $25)\n\n📌 Individual Sales (Per Item ON):\n→ Client price per item: $5.90\n→ 5 transactions at $5.90 = $29.50 total\n→ OLX commission: ($5×1.02+$0.80)×5 = $4.50\n→ You keep: $29.50 - $4.50 = $25 (your price)\n\n📦 Batch Sale (Per Item OFF):\n→ Client price for set: $26.30\n→ 1 transaction at $26.30\n→ OLX commission: $25×1.02+$0.80 = $26.30 - $25 = $1.30\n→ You keep: $26.30 - $1.30 = $25 (your price)\n\nDifference:\n→ Individual: Clients pay more ($29.50 vs $26.30)\n→ Batch: More economical for client, faster sale\n\n💡 STRATEGY CHOICE\n\n✅ Sell INDIVIDUALLY when:\n→ High-demand items (keychains, figurines)\n→ Different clients buy 1 pc each\n→ Have time for multiple listings\n→ Can get higher total revenue\n\n✅ Sell as BATCH when:\n→ Sets that go together\n→ Want to quickly sell entire batch\n→ Client wants multiple at once\n→ Save on OLX commission\n\n⚠️ IMPORTANT\n\n• Calculator shows price FOR CLIENT (including commission)\n• You receive your stated price minus OLX commission\n• Commission is always deducted from you as seller\n• Mode choice doesn't affect your profit, only client price"
+      }
+    }
   }
 }

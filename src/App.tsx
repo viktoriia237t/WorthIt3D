@@ -7,13 +7,16 @@ import { Tabs, Tab } from "@heroui/tabs";
 import { Tooltip } from "@heroui/tooltip";
 import { Badge } from "@heroui/badge";
 import { Alert } from "@heroui/alert";
-import { Save, SaveAll, Eraser, FilePlus } from "lucide-react";
+import { useDisclosure } from "@heroui/use-disclosure";
+import { Save, SaveAll, Eraser, FilePlus, FileText, HelpCircle } from "lucide-react";
 import { ToastProvider, addToast } from "@heroui/toast";
 import { CalculatorForm } from './components/CalculatorForm';
 import { CalculationResultComponent } from './components/CalculationResult';
 import { CalculationHistory } from './components/CalculationHistory';
 import { LanguageSwitcher } from './components/LanguageSwitcher';
 import { GitHubLink } from './components/GitHubLink';
+import ChangelogModal from './components/ChangelogModal';
+import HelpModal from './components/HelpModal';
 import { useCalculator } from './hooks/useCalculator';
 import { useCalculationHistory } from './hooks/useCalculationHistory';
 import { useCalculationManager } from './hooks/useCalculationManager';
@@ -45,6 +48,10 @@ function App() {
 
   // Tab state
   const [activeTab, setActiveTab] = useState<string>('calculator');
+
+  // Modal states
+  const { isOpen: isChangelogOpen, onOpen: onChangelogOpen, onOpenChange: onChangelogOpenChange } = useDisclosure();
+  const { isOpen: isHelpOpen, onOpen: onHelpOpen, onOpenChange: onHelpOpenChange } = useDisclosure();
 
   // Calculation manager hook - handles form state and localStorage
   const calculationManager = useCalculationManager();
@@ -174,6 +181,28 @@ function App() {
               <Logo/>
             </div>
             <div className="flex-1 flex justify-end items-center gap-2">
+              <Tooltip content={t('header.help')}>
+                <Button
+                  isIconOnly
+                  size="sm"
+                  variant="light"
+                  onPress={onHelpOpen}
+                  aria-label={t('header.help')}
+                >
+                  <HelpCircle size={20} />
+                </Button>
+              </Tooltip>
+              <Tooltip content={t('header.changelog')}>
+                <Button
+                  isIconOnly
+                  size="sm"
+                  variant="light"
+                  onPress={onChangelogOpen}
+                  aria-label={t('header.changelog')}
+                >
+                  <FileText size={20} />
+                </Button>
+              </Tooltip>
               <GitHubLink />
               <LanguageSwitcher />
             </div>
@@ -366,6 +395,10 @@ function App() {
         </footer>
         </div>
       </div>
+
+      {/* Modals */}
+      <ChangelogModal isOpen={isChangelogOpen} onOpenChange={onChangelogOpenChange} />
+      <HelpModal isOpen={isHelpOpen} onOpenChange={onHelpOpenChange} />
     </>
   );
 }

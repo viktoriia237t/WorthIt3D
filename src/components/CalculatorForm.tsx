@@ -6,6 +6,7 @@ import { Card, CardBody, CardHeader } from '@heroui/card';
 import { Divider } from '@heroui/divider';
 import { Switch } from '@heroui/switch';
 import { Accordion, AccordionItem } from '@heroui/accordion';
+import { Tooltip } from '@heroui/tooltip';
 // Іконки для візуалізації
 import {
     Package,
@@ -19,7 +20,8 @@ import {
     Weight,
     CircleDollarSign,
     Trash2,
-    Plus
+    Plus,
+    Info
 } from "lucide-react";
 
 import type { CalculationState, CustomExpense } from '../types/calculator';
@@ -281,7 +283,14 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({
                         />
                         <NumberInput
                             variant="flat"
-                            label={t('form.modelInfo.batchCount')}
+                            label={
+                                <div className="flex items-center gap-1">
+                                    {t('form.modelInfo.batchCount')}
+                                    <Tooltip content={t('form.modelInfo.batchCountTooltip')}>
+                                        <Info size={14} className="text-default-400 cursor-help" />
+                                    </Tooltip>
+                                </div>
+                            }
                             labelPlacement="outside"
                             placeholder="1"
                             value={state.batchCount}
@@ -320,7 +329,14 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({
                         />
                         <NumberInput
                             variant="flat"
-                            label={t('form.electricity.dryerConsumption')}
+                            label={
+                                <div className="flex items-center gap-1">
+                                    {t('form.electricity.dryerConsumption')}
+                                    <Tooltip content={t('form.electricity.dryerConsumptionTooltip')}>
+                                        <Info size={14} className="text-default-400 cursor-help" />
+                                    </Tooltip>
+                                </div>
+                            }
                             labelPlacement="outside"
                             startContent={<Zap size={18} className="text-default-400" />}
                             value={state.dryerConsumption}
@@ -541,8 +557,11 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({
                                 isSelected={state.dryDuringPrint}
                                 onValueChange={(value) => handleBooleanChange('dryDuringPrint', value)}
                             >
-                                <div className="flex flex-col gap-1">
+                                <div className="flex items-center gap-1">
                                     {t('form.time.dryDuringPrint')}
+                                    <Tooltip content={t('form.electricity.dryDuringPrintTooltip')}>
+                                        <Info size={14} className="text-default-400 cursor-help" />
+                                    </Tooltip>
                                 </div>
                             </Switch>
                         </div>
@@ -577,7 +596,14 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({
                         />
                         <NumberInput
                             variant="flat"
-                            label={t('form.business.markup')}
+                            label={
+                                <div className="flex items-center gap-1">
+                                    {t('form.business.markup')}
+                                    <Tooltip content={t('form.business.markupTooltip')}>
+                                        <Info size={14} className="text-default-400 cursor-help" />
+                                    </Tooltip>
+                                </div>
+                            }
                             labelPlacement="outside"
                             placeholder="100"
                             value={state.markup}
@@ -586,7 +612,14 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({
                         />
                         <NumberInput
                             variant="flat"
-                            label={t('form.business.failureRate')}
+                            label={
+                                <div className="flex items-center gap-1">
+                                    {t('form.business.failureRate')}
+                                    <Tooltip content={t('form.business.failureRateTooltip')}>
+                                        <Info size={14} className="text-default-400 cursor-help" />
+                                    </Tooltip>
+                                </div>
+                            }
                             labelPlacement="outside"
                             placeholder="0"
                             value={state.failureRate}
@@ -701,7 +734,12 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({
                                         isSelected={expense.includeInFee}
                                         onValueChange={(value) => handleUpdateCustomExpense(expense.id, 'includeInFee', value)}
                                     >
-                                        <span className="text-small">{t('form.additional.includeInFee')}</span>
+                                        <div className="flex items-center gap-1">
+                                            <span className="text-small">{t('form.additional.includeInFee')}</span>
+                                            <Tooltip content={t('form.additional.includeInFeeTooltip')}>
+                                                <Info size={14} className="text-default-400 cursor-help" />
+                                            </Tooltip>
+                                        </div>
                                     </Switch>
                                     {state.batchCount > 1 && (
                                         <Switch
