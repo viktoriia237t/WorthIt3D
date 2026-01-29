@@ -18,7 +18,6 @@ import {
     FileText,
     Weight,
     CircleDollarSign,
-    Cpu,
     Trash2,
     Plus
 } from "lucide-react";
@@ -194,6 +193,7 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({
             name: '',
             amount: 0,
             includeInFee: false,
+            perItem: true,
         };
         const newState = {
             ...state,
@@ -205,7 +205,7 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({
         onStateChange(newState);
     };
 
-    const handleUpdateCustomExpense = (id: string, field: 'name' | 'amount' | 'includeInFee', value: string | number | boolean) => {
+    const handleUpdateCustomExpense = (id: string, field: 'name' | 'amount' | 'includeInFee' | 'perItem', value: string | number | boolean) => {
         const newState = {
             ...state,
             customExpenses: state.customExpenses.map(exp =>
@@ -280,6 +280,17 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({
                             onChange={(e) => onModelLinkChange?.(e.target.value)}
                         />
                     </div>
+                    <Divider className="my-4" />
+                    <NumberInput
+                        variant="flat"
+                        label={t('form.modelInfo.batchCount')}
+                        labelPlacement="outside"
+                        placeholder="1"
+                        value={state.batchCount}
+                        onChange={(value) => handleChange('batchCount', Math.max(1, value))}
+                        min={1}
+                        description={t('form.modelInfo.batchCountDesc')}
+                    />
                 </AccordionItem>
 
                 {/* 1. ЕЛЕКТРИКА */}
@@ -447,6 +458,27 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({
                             onChange={(value) => handleChange('spoolWeight', value)}
                             min={0}
                         />
+                        {state.batchCount > 1 && (
+                            <>
+                                <Divider className="md:col-span-2 my-2" />
+                                <div className="md:col-span-2">
+                                    <Switch
+                                        size="sm"
+                                        isSelected={state.weightPerModel}
+                                        onValueChange={(value) => handleBooleanChange('weightPerModel', value)}
+                                    >
+                                        <div className="flex flex-col gap-1">
+                                            <span className="text-small font-medium">{t('form.materials.weightPerModel')}</span>
+                                            <span className="text-tiny text-default-400">
+                                                {state.weightPerModel
+                                                    ? t('form.materials.weightPerModelDesc')
+                                                    : t('form.materials.weightForBatchDesc')}
+                                            </span>
+                                        </div>
+                                    </Switch>
+                                </div>
+                            </>
+                        )}
                     </div>
                 </AccordionItem>
 
@@ -505,7 +537,6 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({
                                 onChange={(value) => handleChange('dryTime', value)}
                                 endContent={<span className="text-tiny text-default-400">{t('units.hours')}</span>}
                                 min={0}
-                                isDisabled={state.dryDuringPrint}
                             />
                             <Switch
                                 isSelected={state.dryDuringPrint}
@@ -589,11 +620,29 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({
                                 >
                                     <div className="flex flex-col gap-1">
                                         <p className="text-medium font-semibold">{t('form.business.includeOlxFee')}</p>
-                                        <p className="text-tiny text-default-400">
-                                            {t('form.business.includeOlxFee')}
-                                        </p>
+                                        <p className="text-tiny text-default-400">{t('form.business.includeOlxFeeDesc')}</p>
                                     </div>
                                 </Switch>
+
+                                {/* OLX Per-Item Toggle - Only show when OLX enabled and batch mode active */}
+                                {state.includeOlxFee && state.batchCount > 1 && (
+                                    <div className="ml-4 pl-4 border-l-2 border-default-200">
+                                        <Switch
+                                            size="sm"
+                                            isSelected={state.olxFeePerItem}
+                                            onValueChange={(value) => handleBooleanChange('olxFeePerItem', value)}
+                                        >
+                                            <div className="flex flex-col gap-1">
+                                                <span className="text-small font-medium">{t('form.business.olxFeePerItem')}</span>
+                                                <span className="text-tiny text-default-400">
+                                                    {state.olxFeePerItem
+                                                        ? t('form.business.olxFeePerItemDesc')
+                                                        : t('form.business.olxFeeBatchCommissionDesc')}
+                                                </span>
+                                            </div>
+                                        </Switch>
+                                    </div>
+                                )}
                             </div>
                         </>
                     )}
@@ -647,13 +696,31 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({
                                         <Trash2 size={18} />
                                     </Button>
                                 </div>
-                                <Switch
-                                    size="sm"
-                                    isSelected={expense.includeInFee}
-                                    onValueChange={(value) => handleUpdateCustomExpense(expense.id, 'includeInFee', value)}
-                                >
-                                    <span className="text-small">{t('form.additional.includeInFee')}</span>
-                                </Switch>
+                                <div className="flex flex-col gap-2">
+                                    <Switch
+                                        size="sm"
+                                        isSelected={expense.includeInFee}
+                                        onValueChange={(value) => handleUpdateCustomExpense(expense.id, 'includeInFee', value)}
+                                    >
+                                        <span className="text-small">{t('form.additional.includeInFee')}</span>
+                                    </Switch>
+                                    {state.batchCount > 1 && (
+                                        <Switch
+                                            size="sm"
+                                            isSelected={expense.perItem}
+                                            onValueChange={(value) => handleUpdateCustomExpense(expense.id, 'perItem', value)}
+                                        >
+                                            <div className="flex flex-col">
+                                                <span className="text-small">{t('form.additional.perItem')}</span>
+                                                <span className="text-tiny text-default-400">
+                                                    {expense.perItem
+                                                        ? t('form.additional.perItemDesc')
+                                                        : t('form.additional.perBatchDesc')}
+                                                </span>
+                                            </div>
+                                        </Switch>
+                                    )}
+                                </div>
                             </div>
                         ))}
                         <Button

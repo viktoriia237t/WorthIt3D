@@ -10,11 +10,15 @@ import type { CalculationResult } from '../types/calculator';
 interface CalculationResultProps {
     result: CalculationResult;
     weight: number; // Weight in grams for per-gram calculations
+    batchCount: number;
+    olxFeePerItem: boolean;
 }
 
 export const CalculationResultComponent: React.FC<CalculationResultProps> = ({
                                                                                  result,
                                                                                  weight,
+                                                                                 batchCount,
+                                                                                 olxFeePerItem,
                                                                              }) => {
     const { t, i18n } = useTranslation();
 
@@ -48,6 +52,14 @@ export const CalculationResultComponent: React.FC<CalculationResultProps> = ({
                     </p>
                 </div>
             </CardHeader>
+
+            {batchCount > 1 && (
+                <div className="px-6 pt-2">
+                    <Chip size="sm" variant="flat" color="secondary" className="font-semibold">
+                        {t('result.batchMode', { count: batchCount })}
+                    </Chip>
+                </div>
+            )}
 
             <Divider />
 
@@ -126,18 +138,34 @@ export const CalculationResultComponent: React.FC<CalculationResultProps> = ({
                     <div className="flex flex-col p-4 rounded-2xl bg-warning-50 dark:bg-warning-900/20 border-1 border-warning-100 dark:border-warning-800/30 gap-2">
                         <div className="flex justify-between items-center">
                             <div className="flex flex-col">
-                                <span className="text-warning-700 dark:text-warning-400 font-bold">{t('result.totalCost')}</span>
+                                <span className="text-warning-700 dark:text-warning-400 font-bold">
+                                    {batchCount > 1 ? t('result.totalCostBatch') : t('result.totalCost')}
+                                </span>
                             </div>
                             <span className="text-xl font-bold text-warning-700 dark:text-warning-400">
-                  {formatCurrency(result.totalCost)}
-                </span>
+                                {formatCurrency(result.totalCost)}
+                            </span>
                         </div>
+
+                        {/* Per-item cost - only show when batch count > 1 */}
+                        {batchCount > 1 && (
+                            <div className="flex justify-between items-center pt-2 border-t border-warning-200/50 dark:border-warning-700/30">
+                                <span className="text-[11px] text-warning-600/80 dark:text-warning-400/80 font-medium">
+                                    {t('result.perItem')}
+                                </span>
+                                <span className="text-sm font-semibold text-warning-700 dark:text-warning-400">
+                                    {formatCurrency(result.perItemCost)}
+                                </span>
+                            </div>
+                        )}
+
+                        {/* Per-gram cost */}
                         {weight > 0 && (
                             <div className="flex justify-between items-center pt-2 border-t border-warning-200/50 dark:border-warning-700/30">
                                 <span className="text-[11px] text-warning-600/80 dark:text-warning-400/80 font-medium">{t('result.perGram')}</span>
                                 <span className="text-sm font-semibold text-warning-700 dark:text-warning-400">
-                    {formatCurrency(costPerGram)}/{t('units.gram')}
-                  </span>
+                                    {formatCurrency(costPerGram)}/{t('units.gram')}
+                                </span>
                             </div>
                         )}
                     </div>
@@ -147,11 +175,23 @@ export const CalculationResultComponent: React.FC<CalculationResultProps> = ({
                         <div className="flex flex-col gap-3 relative z-10">
                             <div className="flex flex-row justify-between items-center">
                                 <div>
-                                    <p className="text-xs font-black uppercase opacity-70 tracking-widest mb-1">{t('result.finalPrice')}</p>
+                                    <p className="text-xs font-black uppercase opacity-70 tracking-widest">
+                                        {batchCount > 1 ? t('result.finalPriceBatch') : t('result.finalPrice')}
+                                    </p>
                                     <h3 className="text-4xl font-black">{formatCurrency(result.finalPrice)}</h3>
                                 </div>
                                 <TrendingUp className="opacity-20" size={80} />
                             </div>
+
+                            {/* Per-item price */}
+                            {batchCount > 1 && (
+                                <div className="flex justify-between items-center pt-2 border-t border-primary-foreground/20">
+                                    <span className="text-[11px] font-medium opacity-80">{t('result.perItem')}</span>
+                                    <span className="text-sm font-bold">{formatCurrency(result.perItemPrice)}</span>
+                                </div>
+                            )}
+
+                            {/* Per-gram price */}
                             {weight > 0 && (
                                 <div className="flex justify-between items-center pt-2 border-t border-primary-foreground/20">
                                     <span className="text-[11px] font-medium opacity-80">{t('result.perGram')}</span>
@@ -169,29 +209,50 @@ export const CalculationResultComponent: React.FC<CalculationResultProps> = ({
                             <div className="flex flex-col gap-2 relative z-10">
                                 <div className="flex justify-between items-start">
                                     <div>
-                                        <p className="text-[10px] font-bold uppercase opacity-70 tracking-widest">{t('result.olxPrice')}</p>
+                                        <p className="text-[10px] font-bold uppercase opacity-70 tracking-widest">
+                                            {batchCount > 1 ? t('result.olxPriceBatch') : t('result.olxPrice')}
+                                        </p>
                                         <h3 className="text-3xl font-black">{formatCurrency(result.olxPrice)}</h3>
                                     </div>
                                     <Package className="opacity-20" size={60} />
                                 </div>
+
+                                {/* Per-item OLX price */}
+                                {batchCount > 1 && (
+                                    <div className="flex justify-between items-center pt-1 border-t border-white/20">
+                                        <span className="text-[11px] font-medium opacity-80">{t('result.perItem')}</span>
+                                        <span className="text-sm font-bold">{formatCurrency(result.olxPricePerItem)}</span>
+                                    </div>
+                                )}
+
                                 <p className="text-[11px] opacity-80 font-medium">
-                                    OLX: +2% + 20₴
+                                    {batchCount > 1 && olxFeePerItem
+                                        ? `OLX: (+2% + 20₴) × ${batchCount} шт.`
+                                        : 'OLX: +2% + 20₴'}
                                 </p>
                             </div>
                         </div>
                     )}
 
                     {/* Чистий прибуток */}
-                    <div className="flex flex-col md:flex-row justify-between items-center p-3 px-5 rounded-2xl bg-success-50 dark:bg-success-900/20 border-1 border-success-100 dark:border-success-800/30">
-            <span className="text-success-700 dark:text-success-400 font-semibold flex items-center gap-2">
-              {t('result.profit')}
-              <Tooltip content={t('result.profit')}>
-                <Info size={14} className="cursor-help" />
-              </Tooltip>
-            </span>
-                        <span className="text-2xl font-black text-success-700 dark:text-success-400">
-              {formatCurrency(result.profit)}
-            </span>
+                    <div className="flex flex-col md:flex-row justify-between items-center p-3 px-5 rounded-2xl bg-success-50 dark:bg-success-900/20 border-1 border-success-100 dark:border-success-800/30 gap-2">
+                        <span className="text-success-700 dark:text-success-400 font-semibold flex items-center gap-2">
+                            {batchCount > 1 ? t('result.profitBatch') : t('result.profit')}
+                            <Tooltip content={batchCount > 1 ? t('result.profitBatchTooltip') : t('result.profitTooltip')}>
+                                <Info size={14} className="cursor-help" />
+                            </Tooltip>
+                        </span>
+                        <div className="flex flex-col items-end gap-1">
+                            <span className="text-2xl font-black text-success-700 dark:text-success-400">
+                                {formatCurrency(result.profit)}
+                            </span>
+                            {/* Per-item profit */}
+                            {batchCount > 1 && (
+                                <span className="text-xs text-success-600 dark:text-success-500">
+                                    {formatCurrency(result.perItemProfit)} {t('result.perItem')}
+                                </span>
+                            )}
+                        </div>
                     </div>
                 </div>
             </CardBody>

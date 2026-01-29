@@ -312,7 +312,12 @@ function App() {
               {/* Результат */}
               <aside className="lg:col-span-1" aria-label="Calculation results">
                 <div className="sticky top-4">
-                  <CalculationResultComponent result={result} weight={currentState.weight} />
+                  <CalculationResultComponent
+                    result={result}
+                    weight={currentState.weight}
+                    batchCount={currentState.batchCount}
+                    olxFeePerItem={currentState.olxFeePerItem}
+                  />
                 </div>
               </aside>
             </div>

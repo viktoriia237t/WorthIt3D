@@ -49,6 +49,11 @@ describe('useCalculationHistory', () => {
     profit: 97,
     olxPrice: 0,
     olxProfit: 0,
+    perItemCost: 0,
+    perItemPrice: 0,
+    perItemProfit: 0,
+    olxPricePerItem: 0,
+    olxProfitPerItem: 0,
   };
 
   beforeEach(() => {
@@ -146,7 +151,8 @@ describe('useCalculationHistory', () => {
     it('should generate unique IDs', () => {
       const { result } = renderHook(() => useCalculationHistory());
 
-      let id1: string, id2: string;
+      let id1 = '';
+      let id2 = '';
 
       act(() => {
         id1 = result.current.addCalculation(mockState, mockResult);
@@ -320,12 +326,12 @@ describe('useCalculationHistory', () => {
     it('should preserve pinned calculations when clearing', () => {
       const { result } = renderHook(() => useCalculationHistory());
 
-      let id1: string, id2: string, id3: string;
+      let id2 = '';
 
       act(() => {
-        id1 = result.current.addCalculation(mockState, mockResult, 'Item 1');
+        result.current.addCalculation(mockState, mockResult, 'Item 1');
         id2 = result.current.addCalculation(mockState, mockResult, 'Item 2');
-        id3 = result.current.addCalculation(mockState, mockResult, 'Item 3');
+        result.current.addCalculation(mockState, mockResult, 'Item 3');
       });
 
       // Pin id2
@@ -383,12 +389,12 @@ describe('useCalculationHistory', () => {
     it('should sort pinned items to the front', () => {
       const { result } = renderHook(() => useCalculationHistory());
 
-      let id1: string, id2: string, id3: string;
+      let id1: string;
 
       act(() => {
         id1 = result.current.addCalculation(mockState, mockResult, 'Item 1');
-        id2 = result.current.addCalculation(mockState, mockResult, 'Item 2');
-        id3 = result.current.addCalculation(mockState, mockResult, 'Item 3');
+        result.current.addCalculation(mockState, mockResult, 'Item 2');
+        result.current.addCalculation(mockState, mockResult, 'Item 3');
       });
 
       // Order: id3, id2, id1 (newest first)

@@ -118,13 +118,18 @@
       "link": "Model Link",
       "linkPlaceholder": "https://...",
       "note": "Note",
-      "notePlaceholder": "Additional information"
+      "notePlaceholder": "Additional information",
+      "batchCount": "Batch Count",
+      "batchCountDesc": "Number of identical models on plate (more than one enables batch mode)"
     },
     "materials": {
       "title": "Materials",
       "weight": "Model weight with supports (grams)",
       "spoolPrice": "Spool price ($)",
-      "spoolWeight": "Spool weight (grams)"
+      "spoolWeight": "Spool weight (grams)",
+      "weightPerModel": "Weight is per single model",
+      "weightPerModelDesc": "Weight will be multiplied by batch count",
+      "weightForBatchDesc": "Weight represents entire batch"
     },
     "time": {
       "title": "Time",
@@ -157,7 +162,11 @@
       "title": "Business Parameters",
       "failureRate": "Failure rate (%)",
       "markup": "Markup (%)",
-      "includeOlxFee": "Include OLX fee (+2% + 20$)"
+      "includeOlxFee": "Include OLX fee (+2% + 20$)",
+      "includeOlxFeeDesc": "Add OLX marketplace commission to final price",
+      "olxFeePerItem": "Commission per item",
+      "olxFeePerItemDesc": "Calculate commission for each item separately (selling individually): (+2% + 20$) × count",
+      "olxFeeBatchCommissionDesc": "Single commission for entire batch (selling as set): +2% + 20$ total"
     },
     "additional": {
       "title": "Additional Costs",
@@ -166,7 +175,10 @@
       "addExpense": "Add Expense",
       "expenseName": "Expense name",
       "expenseAmount": "Amount ($)",
-      "includeInFee": "Include in base cost (affected by failure rate and markup)"
+      "includeInFee": "Include in base cost (affected by failure rate and markup)",
+      "perItem": "Calculate per item",
+      "perItemDesc": "This expense will be multiplied by batch count (e.g., keychain ring for each item)",
+      "perBatchDesc": "This expense applies to entire batch (e.g., shipping box for all items)"
     }
   },
   "result": {
@@ -183,12 +195,20 @@
     "subtotal": "Subtotal",
     "failureRate": "Failure Reserve",
     "totalCost": "Cost Price",
+    "totalCostBatch": "Cost Price (Batch)",
     "markup": "Markup",
     "finalPrice": "Final Client Price",
+    "finalPriceBatch": "Final Price (Batch)",
     "profit": "Your Profit",
+    "profitBatch": "Profit (Batch)",
+    "profitTooltip": "Net profit after all expenses",
+    "profitBatchTooltip": "Total profit for entire batch. Per-item profit shown below.",
     "olxPrice": "Price with OLX fee",
+    "olxPriceBatch": "OLX Price (Batch)",
     "olxProfit": "Profit after OLX",
     "perGram": "Per gram",
+    "perItem": "per item",
+    "batchMode": "Batch: {{count}} items",
     "tip": "Tip:",
     "tipMessage": "This price is calculated based on your settings. You can adjust the markup in the configuration menu for competitiveness."
   },

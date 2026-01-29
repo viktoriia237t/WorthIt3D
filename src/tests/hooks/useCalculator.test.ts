@@ -1,7 +1,8 @@
 import { describe, it, expect } from 'vitest';
 import { renderHook } from '@testing-library/react';
 import { useCalculator } from '../../hooks/useCalculator';
-import { CalculationState, DEFAULT_CALCULATION_STATE } from '../../types/calculator';
+import type { CalculationState } from '../../types/calculator';
+import { DEFAULT_CALCULATION_STATE } from '../../types/calculator';
 
 describe('useCalculator', () => {
   describe('Material Cost Calculation', () => {
@@ -220,8 +221,8 @@ describe('useCalculator', () => {
       const state: CalculationState = {
         ...DEFAULT_CALCULATION_STATE,
         customExpenses: [
-          { id: '1', name: 'Packaging', amount: 20, includeInFee: true },
-          { id: '2', name: 'Shipping', amount: 30, includeInFee: false },
+          { id: '1', name: 'Packaging', amount: 20, includeInFee: true, perItem: true },
+          { id: '2', name: 'Shipping', amount: 30, includeInFee: false, perItem: true },
         ],
       };
 
@@ -238,8 +239,8 @@ describe('useCalculator', () => {
         spoolPrice: 800,
         spoolWeight: 1000,
         customExpenses: [
-          { id: '1', name: 'Material', amount: 20, includeInFee: true },
-          { id: '2', name: 'Service', amount: 30, includeInFee: false },
+          { id: '1', name: 'Material', amount: 20, includeInFee: true, perItem: true },
+          { id: '2', name: 'Service', amount: 30, includeInFee: false, perItem: true },
         ],
       };
 
@@ -315,7 +316,7 @@ describe('useCalculator', () => {
         spoolWeight: 1000,
         markup: 100,
         customExpenses: [
-          { id: '1', name: 'Fee', amount: 50, includeInFee: false },
+          { id: '1', name: 'Fee', amount: 50, includeInFee: false, perItem: true },
         ],
       };
 
@@ -431,10 +432,14 @@ describe('useCalculator', () => {
         // Additional
         consumables: 25,
         customExpenses: [
-          { id: '1', name: 'Packaging', amount: 15, includeInFee: true },
-          { id: '2', name: 'Delivery', amount: 50, includeInFee: false },
+          { id: '1', name: 'Packaging', amount: 15, includeInFee: true, perItem: true },
+          { id: '2', name: 'Delivery', amount: 50, includeInFee: false, perItem: true },
         ],
         includeOlxFee: true,
+        olxFeePerItem: true,
+        // Batch
+        batchCount: 1,
+        weightPerModel: true,
       };
 
       const { result } = renderHook(() => useCalculator(state));

@@ -41,6 +41,11 @@ export interface CalculationState {
 
   // OLX комісія
   includeOlxFee: boolean; // Включити комісію OLX (+2% + 20 грн)
+  olxFeePerItem: boolean; // true = commission per item × count, false = single commission for batch
+
+  // Batch printing
+  batchCount: number; // Number of models in batch (min: 1, batch mode enabled when > 1)
+  weightPerModel: boolean; // true = weight per model, false = weight for entire batch
 }
 
 export interface CustomExpense {
@@ -48,6 +53,7 @@ export interface CustomExpense {
   name: string; // Назва витрати (пакування, доставка і т.д.)
   amount: number; // Сума (грн)
   includeInFee: boolean; // Включити у базову вартість (з урахуванням браку та націнки)
+  perItem: boolean; // multiply by batchCount when true (only relevant in batch mode)
 }
 
 export interface CalculationResult {
@@ -70,6 +76,13 @@ export interface CalculationResult {
   // OLX
   olxPrice: number; // Ціна з комісією OLX (finalPrice * 1.02 + 20)
   olxProfit: number; // Прибуток з урахуванням OLX комісії
+
+  // Batch results (only populated when batchPrint = true and batchCount > 1)
+  perItemCost: number; // Total cost ÷ batchCount
+  perItemPrice: number; // Final price ÷ batchCount
+  perItemProfit: number; // Profit ÷ batchCount
+  olxPricePerItem: number; // OLX price ÷ batchCount
+  olxProfitPerItem: number; // OLX profit ÷ batchCount
 }
 
 export interface CalculationHistory {
@@ -126,4 +139,9 @@ export const DEFAULT_CALCULATION_STATE: CalculationState = {
 
   // OLX
   includeOlxFee: false,
+  olxFeePerItem: true,
+
+  // Batch printing
+  batchCount: 1,
+  weightPerModel: true,
 };

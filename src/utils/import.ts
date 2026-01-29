@@ -168,7 +168,10 @@ export async function importFromCSV(file: File): Promise<CalculationHistory[]> {
               printTime: parseNumber(mappedRow['Print Time(h)']),
               prepTime: parseNumber(mappedRow['Prep Time(h)']),
               postTime: parseNumber(mappedRow['Post Time(h)']),
+              dryTime: 0,
+              dryDuringPrint: false,
               powerConsumption: parseNumber(mappedRow['Power(kW)']),
+              dryerConsumption: 0,
               electricityTariff: parseNumber(mappedRow['Tariff']),
               printerPrice: parseNumber(mappedRow['Printer Price']),
               lifespan: parseNumber(mappedRow['Lifespan(h)']),
@@ -182,6 +185,9 @@ export async function importFromCSV(file: File): Promise<CalculationHistory[]> {
               consumables: parseNumber(mappedRow['Consumables']),
               customExpenses: [], // CSV doesn't preserve custom expenses array
               includeOlxFee: parseBoolean(mappedRow['Include OLX']),
+              olxFeePerItem: true,
+              batchCount: 1,
+              weightPerModel: true,
             };
 
             // Parse result
@@ -200,6 +206,11 @@ export async function importFromCSV(file: File): Promise<CalculationHistory[]> {
               profit: parseNumber(mappedRow['Profit']),
               olxPrice: parseNumber(mappedRow['OLX Price']),
               olxProfit: parseNumber(mappedRow['OLX Profit']),
+              perItemCost: 0,
+              perItemPrice: 0,
+              perItemProfit: 0,
+              olxPricePerItem: 0,
+              olxProfitPerItem: 0,
             };
 
             // Build calculation history item
