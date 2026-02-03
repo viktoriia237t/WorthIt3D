@@ -479,13 +479,13 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({
                                 <div className="md:col-span-2">
                                     <Switch
                                         size="sm"
-                                        isSelected={state.weightPerModel}
+                                        isSelected={state.weightPerModel === true}
                                         onValueChange={(value) => handleBooleanChange('weightPerModel', value)}
                                     >
                                         <div className="flex flex-col gap-1">
                                             <span className="text-small font-medium">{t('form.materials.weightPerModel')}</span>
                                             <span className="text-tiny text-default-400">
-                                                {state.weightPerModel
+                                                {state.weightPerModel === true
                                                     ? t('form.materials.weightPerModelDesc')
                                                     : t('form.materials.weightForBatchDesc')}
                                             </span>

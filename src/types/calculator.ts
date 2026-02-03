@@ -143,5 +143,5 @@ export const DEFAULT_CALCULATION_STATE: CalculationState = {
 
   // Batch printing
   batchCount: 1,
-  weightPerModel: true,
+  weightPerModel: false,
 };
