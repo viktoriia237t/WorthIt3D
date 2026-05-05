@@ -127,9 +127,12 @@
     },
     "materials": {
       "title": "Materials",
-      "weight": "Model weight with supports (grams)",
+      "filamentName": "Filament name",
+      "filamentNamePlaceholder": "e.g. PLA Black, TPU",
+      "weight": "Weight with supports (g)",
       "spoolPrice": "Spool price ($)",
-      "spoolWeight": "Spool weight (grams)",
+      "spoolWeight": "Spool weight (g)",
+      "addFilament": "Add Filament",
       "weightPerModel": "Weight is per single model",
       "weightPerModelDesc": "Weight will be multiplied by batch count",
       "weightForBatchDesc": "Weight represents entire batch"

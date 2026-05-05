@@ -337,7 +337,10 @@ export const CalculationHistory: React.FC<CalculationHistoryProps> = ({
                                                     </Chip>
                                                 )}
                                                 <Chip size="sm" variant="flat" startContent={<Layers size={12} className="ml-1" />}>
-                                                    {item.state.weight}{t('units.grams')}
+                                                    {(item.state.filaments ?? []).reduce((s, f) => s + f.weight, 0)}{t('units.grams')}
+                                                    {(item.state.filaments ?? []).length > 1 && (
+                                                        <span className="text-default-400 ml-1">({(item.state.filaments ?? []).length}×)</span>
+                                                    )}
                                                 </Chip>
                                                 <Chip size="sm" variant="flat" startContent={<Clock size={12} className="ml-1" />}>
                                                     {item.state.printTime}{t('units.hours')}
@@ -446,7 +449,7 @@ export const CalculationHistory: React.FC<CalculationHistoryProps> = ({
 
                                         {/* Сітка параметрів */}
                                         <div className="grid grid-cols-2 gap-4">
-                                            <DetailBlock label={t('modal.weight')} value={`${selectedItem.state.weight} ${t('units.grams')}`} icon={<Layers size={14}/>} />
+                                            <DetailBlock label={t('modal.weight')} value={`${(selectedItem.state.filaments ?? []).reduce((s, f) => s + f.weight, 0)} ${t('units.grams')}`} icon={<Layers size={14}/>} />
                                             <DetailBlock label={t('modal.printTime')} value={`${selectedItem.state.printTime} ${t('units.hours')}`} icon={<Clock size={14}/>} />
                                         </div>
 

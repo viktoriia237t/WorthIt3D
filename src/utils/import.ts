@@ -1,5 +1,6 @@
 import Papa from 'papaparse';
 import type { CalculationHistory, CalculationState, CalculationResult } from '../types/calculator';
+import { migrateCalculationState } from './migrationHelpers';
 
 /**
  * Safely parse a number with fallback to default value
@@ -38,11 +39,12 @@ function validateCalculationHistory(item: any): CalculationHistory {
     throw new Error('Missing required fields: id, timestamp, state, or result');
   }
 
+  // Migrate old-format state before validation
+  item.state = migrateCalculationState(item.state);
+
   // Validate state structure
   const requiredStateFields = [
-    'weight',
-    'spoolPrice',
-    'spoolWeight',
+    'filaments',
     'printTime',
     'prepTime',
     'postTime',
@@ -162,9 +164,20 @@ export async function importFromCSV(file: File): Promise<CalculationHistory[]> {
 
             // Parse state
             const state: CalculationState = {
-              weight: parseNumber(mappedRow['Weight(g)']),
-              spoolPrice: parseNumber(mappedRow['Spool Price']),
-              spoolWeight: parseNumber(mappedRow['Spool Weight']),
+              filaments: (() => {
+                try {
+                  const raw = mappedRow['Filaments'];
+                  if (raw) return JSON.parse(raw);
+                } catch {}
+                // Legacy CSV fallback: three separate columns
+                return [{
+                  id: 'fil-imported',
+                  name: '',
+                  weight: parseNumber(mappedRow['Weight(g)']),
+                  spoolPrice: parseNumber(mappedRow['Spool Price']),
+                  spoolWeight: parseNumber(mappedRow['Spool Weight']),
+                }];
+              })(),
               printTime: parseNumber(mappedRow['Print Time(h)']),
               prepTime: parseNumber(mappedRow['Prep Time(h)']),
               postTime: parseNumber(mappedRow['Post Time(h)']),

@@ -1,8 +1,21 @@
+export interface FilamentEntry {
+  id: string;
+  name: string;
+  weight: number; // grams used from this filament
+  spoolPrice: number; // price of the full spool (UAH)
+  spoolWeight: number; // total weight of the spool (grams)
+}
+
+export const DEFAULT_FILAMENT_ENTRY: Omit<FilamentEntry, 'id'> = {
+  name: '',
+  weight: 0,
+  spoolPrice: 0,
+  spoolWeight: 0,
+};
+
 export interface CalculationState {
   // Матеріали
-  weight: number; // Вага моделі з підтримками (грами)
-  spoolPrice: number; // Ціна за котушку/літр пластику/смоли (грн)
-  spoolWeight: number; // Вага/об'єм цілої котушки (грами)
+  filaments: FilamentEntry[];
 
   // Час
   printTime: number; // Тривалість друку (години)
@@ -98,9 +111,7 @@ export interface CalculationHistory {
 
 export const DEFAULT_CALCULATION_STATE: CalculationState = {
   // Матеріали
-  weight: 0,
-  spoolPrice: 0,
-  spoolWeight: 0,
+  filaments: [{ id: 'fil-default', name: '', weight: 0, spoolPrice: 0, spoolWeight: 0 }],
 
   // Час
   printTime: 0,

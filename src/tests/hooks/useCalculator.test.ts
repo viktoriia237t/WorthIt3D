@@ -9,9 +9,7 @@ describe('useCalculator', () => {
     it('should calculate material cost correctly', () => {
       const state: CalculationState = {
         ...DEFAULT_CALCULATION_STATE,
-        weight: 100, // grams
-        spoolPrice: 800, // UAH
-        spoolWeight: 1000, // grams
+        filaments: [{ id: 'test', name: '', weight: 100, spoolPrice: 800, spoolWeight: 1000 }],
       };
 
       const { result } = renderHook(() => useCalculator(state));
@@ -23,9 +21,7 @@ describe('useCalculator', () => {
     it('should return 0 when spool weight is 0 (avoid division by zero)', () => {
       const state: CalculationState = {
         ...DEFAULT_CALCULATION_STATE,
-        weight: 100,
-        spoolPrice: 800,
-        spoolWeight: 0,
+        filaments: [{ id: 'test', name: '', weight: 100, spoolPrice: 800, spoolWeight: 0 }],
       };
 
       const { result } = renderHook(() => useCalculator(state));
@@ -36,9 +32,7 @@ describe('useCalculator', () => {
     it('should handle zero weight', () => {
       const state: CalculationState = {
         ...DEFAULT_CALCULATION_STATE,
-        weight: 0,
-        spoolPrice: 800,
-        spoolWeight: 1000,
+        filaments: [{ id: 'test', name: '', weight: 0, spoolPrice: 800, spoolWeight: 1000 }],
       };
 
       const { result } = renderHook(() => useCalculator(state));
@@ -235,9 +229,7 @@ describe('useCalculator', () => {
     it('should include expenses with includeInFee=true in subtotal', () => {
       const state: CalculationState = {
         ...DEFAULT_CALCULATION_STATE,
-        weight: 100,
-        spoolPrice: 800,
-        spoolWeight: 1000,
+        filaments: [{ id: 'test', name: '', weight: 100, spoolPrice: 800, spoolWeight: 1000 }],
         customExpenses: [
           { id: '1', name: 'Material', amount: 20, includeInFee: true, perItem: true },
           { id: '2', name: 'Service', amount: 30, includeInFee: false, perItem: true },
@@ -257,9 +249,7 @@ describe('useCalculator', () => {
     it('should apply failure rate correctly', () => {
       const state: CalculationState = {
         ...DEFAULT_CALCULATION_STATE,
-        weight: 100,
-        spoolPrice: 800,
-        spoolWeight: 1000,
+        filaments: [{ id: 'test', name: '', weight: 100, spoolPrice: 800, spoolWeight: 1000 }],
         failureRate: 10, // 10%
       };
 
@@ -274,9 +264,7 @@ describe('useCalculator', () => {
     it('should not apply failure rate when it is 0', () => {
       const state: CalculationState = {
         ...DEFAULT_CALCULATION_STATE,
-        weight: 100,
-        spoolPrice: 800,
-        spoolWeight: 1000,
+        filaments: [{ id: 'test', name: '', weight: 100, spoolPrice: 800, spoolWeight: 1000 }],
         failureRate: 0,
       };
 
@@ -290,9 +278,7 @@ describe('useCalculator', () => {
     it('should apply markup correctly', () => {
       const state: CalculationState = {
         ...DEFAULT_CALCULATION_STATE,
-        weight: 100,
-        spoolPrice: 800,
-        spoolWeight: 1000,
+        filaments: [{ id: 'test', name: '', weight: 100, spoolPrice: 800, spoolWeight: 1000 }],
         markup: 100, // 100% = 1x
         prepTime: 1,
         hourlyRate: 100,
@@ -311,9 +297,7 @@ describe('useCalculator', () => {
     it('should add fee expenses (includeInFee=false) to final price', () => {
       const state: CalculationState = {
         ...DEFAULT_CALCULATION_STATE,
-        weight: 100,
-        spoolPrice: 800,
-        spoolWeight: 1000,
+        filaments: [{ id: 'test', name: '', weight: 100, spoolPrice: 800, spoolWeight: 1000 }],
         markup: 100,
         customExpenses: [
           { id: '1', name: 'Fee', amount: 50, includeInFee: false, perItem: true },
@@ -333,9 +317,7 @@ describe('useCalculator', () => {
     it('should calculate profit correctly', () => {
       const state: CalculationState = {
         ...DEFAULT_CALCULATION_STATE,
-        weight: 100,
-        spoolPrice: 800,
-        spoolWeight: 1000,
+        filaments: [{ id: 'test', name: '', weight: 100, spoolPrice: 800, spoolWeight: 1000 }],
         markup: 200, // 200% = 2x
       };
 
@@ -352,9 +334,7 @@ describe('useCalculator', () => {
     it('should calculate OLX price when enabled', () => {
       const state: CalculationState = {
         ...DEFAULT_CALCULATION_STATE,
-        weight: 100,
-        spoolPrice: 800,
-        spoolWeight: 1000,
+        filaments: [{ id: 'test', name: '', weight: 100, spoolPrice: 800, spoolWeight: 1000 }],
         markup: 100,
         includeOlxFee: true,
       };
@@ -369,9 +349,7 @@ describe('useCalculator', () => {
     it('should return 0 for OLX price when disabled', () => {
       const state: CalculationState = {
         ...DEFAULT_CALCULATION_STATE,
-        weight: 100,
-        spoolPrice: 800,
-        spoolWeight: 1000,
+        filaments: [{ id: 'test', name: '', weight: 100, spoolPrice: 800, spoolWeight: 1000 }],
         includeOlxFee: false,
       };
 
@@ -383,9 +361,7 @@ describe('useCalculator', () => {
     it('should calculate OLX profit correctly', () => {
       const state: CalculationState = {
         ...DEFAULT_CALCULATION_STATE,
-        weight: 100,
-        spoolPrice: 800,
-        spoolWeight: 1000,
+        filaments: [{ id: 'test', name: '', weight: 100, spoolPrice: 800, spoolWeight: 1000 }],
         markup: 100,
         includeOlxFee: true,
       };
@@ -404,9 +380,7 @@ describe('useCalculator', () => {
     it('should calculate complete scenario correctly', () => {
       const state: CalculationState = {
         // Materials
-        weight: 150,
-        spoolPrice: 1000,
-        spoolWeight: 1000,
+        filaments: [{ id: 'test', name: '', weight: 150, spoolPrice: 1000, spoolWeight: 1000 }],
         // Time
         printTime: 10,
         prepTime: 0.5,

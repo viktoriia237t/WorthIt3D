@@ -127,9 +127,12 @@
     },
     "materials": {
       "title": "Матеріали",
-      "weight": "Вага моделі з підтримками (грами)",
+      "filamentName": "Назва філаменту",
+      "filamentNamePlaceholder": "напр. PLA Чорний, TPU",
+      "weight": "Вага з підтримками (г)",
       "spoolPrice": "Ціна за котушку (₴)",
-      "spoolWeight": "Вага котушки (грами)",
+      "spoolWeight": "Вага котушки (г)",
+      "addFilament": "Додати філамент",
       "weightPerModel": "Вага на одну модель",
       "weightPerModelDesc": "Вага буде помножена на кількість моделей",
       "weightForBatchDesc": "Вага вказана для всього пакету"

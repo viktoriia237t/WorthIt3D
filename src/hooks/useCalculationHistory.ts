@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import type { CalculationHistory, CalculationState, CalculationResult } from '../types/calculator';
+import { migrateCalculationState } from '../utils/migrationHelpers';
 
 const STORAGE_KEY = '3d-calculator-history';
 
@@ -9,8 +10,12 @@ export const useCalculationHistory = () => {
       const stored = localStorage.getItem(STORAGE_KEY);
       if (stored) {
         const parsed = JSON.parse(stored);
+        const migrated = parsed.map((item: any) => ({
+          ...item,
+          state: migrateCalculationState(item.state),
+        }));
         // Sort by timestamp descending (newest first)
-        return parsed.sort((a: CalculationHistory, b: CalculationHistory) => b.timestamp - a.timestamp);
+        return migrated.sort((a: CalculationHistory, b: CalculationHistory) => b.timestamp - a.timestamp);
       }
     } catch (error) {
       console.error('Failed to load calculation history:', error);
@@ -153,7 +158,12 @@ export const useCalculationHistory = () => {
     imported: CalculationHistory[],
     strategy: 'replace' | 'skip' | 'update'
   ) => {
+    const migratedImported = imported.map(item => ({
+      ...item,
+      state: migrateCalculationState(item.state),
+    }));
     setHistory((prev) => {
+      const imported = migratedImported;
       if (strategy === 'replace') {
         return imported.sort((a, b) => {
           if (a.pinned && !b.pinned) return -1;

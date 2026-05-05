@@ -29,9 +29,7 @@ Object.defineProperty(window, 'localStorage', {
 describe('useCalculationHistory', () => {
   const mockState: CalculationState = {
     ...DEFAULT_CALCULATION_STATE,
-    weight: 100,
-    spoolPrice: 800,
-    spoolWeight: 1000,
+    filaments: [{ id: 'test', name: '', weight: 100, spoolPrice: 800, spoolWeight: 1000 }],
   };
 
   const mockResult: CalculationResult = {
@@ -242,7 +240,7 @@ describe('useCalculationHistory', () => {
         id = result.current.addCalculation(mockState, mockResult, 'Original note');
       });
 
-      const updatedState = { ...mockState, weight: 200 };
+      const updatedState = { ...mockState, filaments: [{ id: 'test', name: '', weight: 200, spoolPrice: 800, spoolWeight: 1000 }] };
       const updatedResult = { ...mockResult, materialCost: 160 };
 
       act(() => {
@@ -258,7 +256,7 @@ describe('useCalculationHistory', () => {
       expect(result.current.history).toHaveLength(1);
       expect(result.current.history[0].note).toBe('Updated note');
       expect(result.current.history[0].modelName).toBe('Updated Model');
-      expect(result.current.history[0].state.weight).toBe(200);
+      expect(result.current.history[0].state.filaments[0].weight).toBe(200);
       expect(result.current.history[0].result.materialCost).toBe(160);
     });
 

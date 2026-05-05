@@ -11,7 +11,8 @@ export const useCalculator = (state: CalculationState): CalculationResult => {
       ...state,
       batchCount: state.batchCount ?? 1,
       weightPerModel: state.weightPerModel ?? true,
-      customExpenses: state.customExpenses.map(exp => ({
+      filaments: state.filaments ?? [],
+      customExpenses: (state.customExpenses ?? []).map(exp => ({
         ...exp,
         perItem: exp.perItem ?? true
       }))
@@ -32,11 +33,12 @@ export const useCalculator = (state: CalculationState): CalculationResult => {
       ? normalizedState.batchCount
       : 1;
 
-    const effectiveWeight = isBatchMode && normalizedState.weightPerModel
-      ? normalizedState.weight * effectiveBatchCount
-      : normalizedState.weight;
-
-    const materialCost = safeDivide(effectiveWeight * normalizedState.spoolPrice, normalizedState.spoolWeight);
+    const materialCost = normalizedState.filaments.reduce((total, f) => {
+      const w = isBatchMode && normalizedState.weightPerModel
+        ? f.weight * effectiveBatchCount
+        : f.weight;
+      return total + safeDivide(w * f.spoolPrice, f.spoolWeight);
+    }, 0);
 
     // 2. Електроенергія (C_elec)
     // C_elec = printTime × powerConsumption × electricityTariff + effectiveDryTime × dryerConsumption × electricityTariff
@@ -160,9 +162,7 @@ export const useCalculator = (state: CalculationState): CalculationResult => {
       olxProfitPerItem,
     };
   }, [
-    state.weight,
-    state.spoolPrice,
-    state.spoolWeight,
+    state.filaments,
     state.printTime,
     state.prepTime,
     state.postTime,

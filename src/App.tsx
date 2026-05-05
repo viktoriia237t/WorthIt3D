@@ -357,7 +357,7 @@ function App() {
                 <div className="sticky top-4">
                   <CalculationResultComponent
                     result={result}
-                    weight={currentState.weight}
+                    weight={(currentState.filaments ?? []).reduce((s, f) => s + f.weight, 0)}
                     batchCount={currentState.batchCount}
                     olxFeePerItem={currentState.olxFeePerItem}
                   />

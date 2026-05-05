@@ -24,7 +24,7 @@ import {
     Info
 } from "lucide-react";
 
-import type { CalculationState, CustomExpense } from '../types/calculator';
+import type { CalculationState, CustomExpense, FilamentEntry } from '../types/calculator';
 import { DEFAULT_CALCULATION_STATE } from '../types/calculator';
 import { Button } from '@heroui/button';
 import { NumberInput } from './NumberInput';
@@ -185,6 +185,38 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({
         const newState = { ...state, [field]: value };
         setState(newState);
         // Mark that this is an internal update so useEffect won't reset the state
+        isInternalUpdateRef.current = true;
+        onStateChange(newState);
+    };
+
+    const handleAddFilament = () => {
+        const newFilament: FilamentEntry = {
+            id: `fil-${Date.now()}`,
+            name: '',
+            weight: 0,
+            spoolPrice: 0,
+            spoolWeight: 0,
+        };
+        const newState = { ...state, filaments: [...state.filaments, newFilament] };
+        setState(newState);
+        isInternalUpdateRef.current = true;
+        onStateChange(newState);
+    };
+
+    const handleUpdateFilament = (id: string, field: 'name' | 'weight' | 'spoolPrice' | 'spoolWeight', value: string | number) => {
+        const newState = {
+            ...state,
+            filaments: state.filaments.map(f => f.id === id ? { ...f, [field]: value } : f),
+        };
+        setState(newState);
+        isInternalUpdateRef.current = true;
+        onStateChange(newState);
+    };
+
+    const handleRemoveFilament = (id: string) => {
+        if (state.filaments.length <= 1) return;
+        const newState = { ...state, filaments: state.filaments.filter(f => f.id !== id) };
+        setState(newState);
         isInternalUpdateRef.current = true;
         onStateChange(newState);
     };
@@ -439,59 +471,93 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({
                         </div>
                     }
                 >
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4" onFocus={(e) => e.stopPropagation()}>
-                        <NumberInput
-                            variant="flat"
-                            label={t('form.materials.weight')}
-                            labelPlacement="outside"
-                            placeholder="0.00"
-                            startContent={<Weight size={18} className="text-default-400" />}
-                            endContent={<span className="text-tiny text-default-400">{t('units.grams')}</span>}
-                            value={state.weight}
-                            onChange={(value) => handleChange('weight', value)}
-                            min={0}
-                        />
-                        <NumberInput
-                            variant="flat"
-                            label={t('form.materials.spoolPrice')}
-                            labelPlacement="outside"
-                            placeholder="800"
-                            startContent={<CircleDollarSign size={18} className="text-default-400" />}
-                            endContent={<span className="text-tiny text-default-400">{t('units.uah')}</span>}
-                            value={state.spoolPrice}
-                            onChange={(value) => handleChange('spoolPrice', value)}
-                            min={0}
-                        />
-                        <NumberInput
-                            className="md:col-span-2"
-                            variant="flat"
-                            label={t('form.materials.spoolWeight')}
-                            labelPlacement="outside"
-                            placeholder="1000"
-                            endContent={<span className="text-tiny text-default-400">{t('units.grams')}</span>}
-                            value={state.spoolWeight}
-                            onChange={(value) => handleChange('spoolWeight', value)}
-                            min={0}
-                        />
+                    <div className="flex flex-col gap-3" onFocus={(e) => e.stopPropagation()}>
+                        {state.filaments.map((filament) => (
+                            <div key={filament.id} className="flex flex-col gap-3 p-3 rounded-lg border border-default-200 bg-default-50 dark:bg-default-100/30">
+                                <div className="flex gap-2 items-end">
+                                    <Input
+                                        variant="flat"
+                                        label={t('form.materials.filamentName')}
+                                        labelPlacement="outside"
+                                        placeholder={t('form.materials.filamentNamePlaceholder')}
+                                        value={filament.name}
+                                        onChange={(e) => handleUpdateFilament(filament.id, 'name', e.target.value)}
+                                        className="flex-1"
+                                    />
+                                    <Button
+                                        isIconOnly
+                                        color="danger"
+                                        variant="flat"
+                                        size="lg"
+                                        isDisabled={state.filaments.length <= 1}
+                                        onPress={() => handleRemoveFilament(filament.id)}
+                                        className="mb-0.5"
+                                    >
+                                        <Trash2 size={18} />
+                                    </Button>
+                                </div>
+                                <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                                    <NumberInput
+                                        variant="flat"
+                                        label={t('form.materials.weight')}
+                                        labelPlacement="outside"
+                                        placeholder="0.00"
+                                        startContent={<Weight size={18} className="text-default-400" />}
+                                        endContent={<span className="text-tiny text-default-400">{t('units.grams')}</span>}
+                                        value={filament.weight}
+                                        onChange={(value) => handleUpdateFilament(filament.id, 'weight', value)}
+                                        min={0}
+                                    />
+                                    <NumberInput
+                                        variant="flat"
+                                        label={t('form.materials.spoolPrice')}
+                                        labelPlacement="outside"
+                                        placeholder="800"
+                                        startContent={<CircleDollarSign size={18} className="text-default-400" />}
+                                        endContent={<span className="text-tiny text-default-400">{t('units.uah')}</span>}
+                                        value={filament.spoolPrice}
+                                        onChange={(value) => handleUpdateFilament(filament.id, 'spoolPrice', value)}
+                                        min={0}
+                                    />
+                                    <NumberInput
+                                        variant="flat"
+                                        label={t('form.materials.spoolWeight')}
+                                        labelPlacement="outside"
+                                        placeholder="1000"
+                                        endContent={<span className="text-tiny text-default-400">{t('units.grams')}</span>}
+                                        value={filament.spoolWeight}
+                                        onChange={(value) => handleUpdateFilament(filament.id, 'spoolWeight', value)}
+                                        min={0}
+                                    />
+                                </div>
+                            </div>
+                        ))}
+                        <Button
+                            color="primary"
+                            variant="bordered"
+                            startContent={<Plus size={18} />}
+                            onPress={handleAddFilament}
+                            className="w-full md:w-auto"
+                        >
+                            {t('form.materials.addFilament')}
+                        </Button>
                         {state.batchCount > 1 && (
                             <>
-                                <Divider className="md:col-span-2 my-2" />
-                                <div className="md:col-span-2">
-                                    <Switch
-                                        size="sm"
-                                        isSelected={state.weightPerModel === true}
-                                        onValueChange={(value) => handleBooleanChange('weightPerModel', value)}
-                                    >
-                                        <div className="flex flex-col gap-1">
-                                            <span className="text-small font-medium">{t('form.materials.weightPerModel')}</span>
-                                            <span className="text-tiny text-default-400">
-                                                {state.weightPerModel === true
-                                                    ? t('form.materials.weightPerModelDesc')
-                                                    : t('form.materials.weightForBatchDesc')}
-                                            </span>
-                                        </div>
-                                    </Switch>
-                                </div>
+                                <Divider className="my-2" />
+                                <Switch
+                                    size="sm"
+                                    isSelected={state.weightPerModel === true}
+                                    onValueChange={(value) => handleBooleanChange('weightPerModel', value)}
+                                >
+                                    <div className="flex flex-col gap-1">
+                                        <span className="text-small font-medium">{t('form.materials.weightPerModel')}</span>
+                                        <span className="text-tiny text-default-400">
+                                            {state.weightPerModel === true
+                                                ? t('form.materials.weightPerModelDesc')
+                                                : t('form.materials.weightForBatchDesc')}
+                                        </span>
+                                    </div>
+                                </Switch>
                             </>
                         )}
                     </div>

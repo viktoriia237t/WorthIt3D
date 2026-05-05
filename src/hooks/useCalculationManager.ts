@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import { DEFAULT_CALCULATION_STATE } from '../types/calculator';
 import type { CalculationState } from '../types/calculator';
+import { migrateCalculationState } from '../utils/migrationHelpers';
 
 const CURRENT_MODEL_STORAGE_KEY = 'current-model-info';
 const CURRENT_STATE_STORAGE_KEY = 'current-calculator-state';
@@ -37,7 +38,7 @@ export const useCalculationManager = (): CalculationManagerState => {
     try {
       const stored = localStorage.getItem(CURRENT_STATE_STORAGE_KEY);
       if (stored) {
-        return JSON.parse(stored);
+        return migrateCalculationState(JSON.parse(stored));
       }
     } catch (error) {
       console.error('Failed to load current state:', error);
