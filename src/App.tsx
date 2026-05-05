@@ -19,9 +19,12 @@ import ChangelogModal from './components/ChangelogModal';
 import HelpModal from './components/HelpModal';
 import { useCalculator } from './hooks/useCalculator';
 import { useCalculationHistory } from './hooks/useCalculationHistory';
+import { useBackendHistory } from './hooks/useBackendHistory';
+import { useAuth } from './hooks/useAuth';
 import { useCalculationManager } from './hooks/useCalculationManager';
 import { useSaveManager } from './hooks/useSaveManager';
 import { useSeoMeta } from './hooks/useSeoMeta';
+import { GoogleSignInButton } from './components/GoogleSignInButton';
 import Logo from '../src/components/Logo';
 import { initGA, logPageView, logEvent } from './utils/analytics';
 
@@ -53,6 +56,9 @@ function App() {
   const { isOpen: isChangelogOpen, onOpen: onChangelogOpen, onOpenChange: onChangelogOpenChange } = useDisclosure();
   const { isOpen: isHelpOpen, onOpen: onHelpOpen, onOpenChange: onHelpOpenChange } = useDisclosure();
 
+  // Auth
+  const { user, loading: authLoading, signInWithGoogle, signOut } = useAuth();
+
   // Calculation manager hook - handles form state and localStorage
   const calculationManager = useCalculationManager();
   const {
@@ -72,8 +78,10 @@ function App() {
     cancelEdit,
   } = calculationManager;
 
-  // History hook
-  const { history, addCalculation, deleteCalculation, updateCalculation, clearHistory, getCalculation, upsertCalculation, togglePin, importHistory } = useCalculationHistory();
+  // History hook — use backend when authenticated, localStorage when not
+  const localHistory = useCalculationHistory();
+  const backendHistory = useBackendHistory(user?.id ?? null);
+  const { history, addCalculation, deleteCalculation, updateCalculation, clearHistory, getCalculation, upsertCalculation, togglePin, importHistory } = user ? backendHistory : localHistory;
 
   // Calculate result
   const result = useCalculator(currentState);
@@ -181,6 +189,12 @@ function App() {
               <Logo/>
             </div>
             <div className="flex-1 flex justify-end items-center gap-2">
+              <GoogleSignInButton
+                user={user}
+                loading={authLoading}
+                onSignIn={signInWithGoogle}
+                onSignOut={signOut}
+              />
               <Tooltip content={t('header.help')}>
                 <Button
                   isIconOnly
