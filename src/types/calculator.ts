@@ -1,16 +1,16 @@
 export interface FilamentEntry {
   id: string;
   name: string;
-  weight: number; // grams used from this filament
-  spoolPrice: number; // price of the full spool (UAH)
-  spoolWeight: number; // total weight of the spool (grams)
+  weight: number | null;
+  spoolPrice: number | null;
+  spoolWeight: number | null;
 }
 
 export const DEFAULT_FILAMENT_ENTRY: Omit<FilamentEntry, 'id'> = {
   name: '',
-  weight: 0,
-  spoolPrice: 0,
-  spoolWeight: 0,
+  weight: null,
+  spoolPrice: null,
+  spoolWeight: null,
 };
 
 export interface CalculationState {
@@ -18,55 +18,55 @@ export interface CalculationState {
   filaments: FilamentEntry[];
 
   // Час
-  printTime: number; // Тривалість друку (години)
-  prepTime: number; // Час на підготовку (години)
-  postTime: number; // Час на пост-обробку (години)
-  dryTime: number; // Час сушіння (години)
-  dryDuringPrint: boolean; // Сушіння під час друку
+  printTime: number | null;
+  prepTime: number | null;
+  postTime: number | null;
+  dryTime: number | null;
+  dryDuringPrint: boolean;
 
   // Електроенергія
-  powerConsumption: number; // Споживання принтера (кВт)
-  dryerConsumption: number; // Споживання сушки (кВт)
-  electricityTariff: number; // Вартість 1 кВт-год (грн)
+  powerConsumption: number | null;
+  dryerConsumption: number | null;
+  electricityTariff: number | null;
 
   // Амортизація
-  printerPrice: number; // Вартість принтера (грн)
-  lifespan: number; // Розрахунковий ресурс (години)
+  printerPrice: number | null;
+  lifespan: number | null;
 
   // Витратні частини (сопла, столи)
-  nozzlePrice: number; // Вартість сопла (грн)
-  nozzleLifespan: number; // Ресурс сопла (години)
-  bedPrice: number; // Вартість столу/плити (грн)
-  bedLifespan: number; // Ресурс столу (години)
+  nozzlePrice: number | null;
+  nozzleLifespan: number | null;
+  bedPrice: number | null;
+  bedLifespan: number | null;
 
   // Робота
-  hourlyRate: number; // Ставка за годину роботи (грн/год)
+  hourlyRate: number | null;
 
   // Бізнес
-  failureRate: number; // Запас на невдалий друк (відсотки, наприклад 10 = +10%)
-  markup: number; // Націнка (відсотки, наприклад 100 = +100%)
+  failureRate: number | null;
+  markup: number | null;
 
   // Додаткові витрати (для Resin друку)
-  consumables: number; // Витратні матеріали (грн)
+  consumables: number | null;
 
   // Кастомні додаткові витрати
   customExpenses: CustomExpense[];
 
   // OLX комісія
-  includeOlxFee: boolean; // Включити комісію OLX (+2% + 20 грн)
-  olxFeePerItem: boolean; // true = commission per item × count, false = single commission for batch
+  includeOlxFee: boolean;
+  olxFeePerItem: boolean;
 
   // Batch printing
-  batchCount: number; // Number of models in batch (min: 1, batch mode enabled when > 1)
-  weightPerModel: boolean; // true = weight per model, false = weight for entire batch
+  batchCount: number;
+  weightPerModel: boolean;
 }
 
 export interface CustomExpense {
   id: string;
-  name: string; // Назва витрати (пакування, доставка і т.д.)
-  amount: number; // Сума (грн)
-  includeInFee: boolean; // Включити у базову вартість (з урахуванням браку та націнки)
-  perItem: boolean; // multiply by batchCount when true (only relevant in batch mode)
+  name: string;
+  amount: number | null;
+  includeInFee: boolean;
+  perItem: boolean;
 }
 
 export interface CalculationResult {
@@ -110,49 +110,38 @@ export interface CalculationHistory {
 }
 
 export const DEFAULT_CALCULATION_STATE: CalculationState = {
-  // Матеріали
-  filaments: [{ id: 'fil-default', name: '', weight: 0, spoolPrice: 0, spoolWeight: 0 }],
+  filaments: [{ id: 'fil-default', name: '', weight: null, spoolPrice: null, spoolWeight: null }],
 
-  // Час
-  printTime: 0,
-  prepTime: 0,
-  postTime: 0,
-  dryTime: 0,
+  printTime: null,
+  prepTime: null,
+  postTime: null,
+  dryTime: null,
   dryDuringPrint: false,
 
-  // Електроенергія
-  powerConsumption: 0,
-  dryerConsumption: 0,
-  electricityTariff: 0,
+  powerConsumption: null,
+  dryerConsumption: null,
+  electricityTariff: null,
 
-  // Амортизація
-  printerPrice: 0,
-  lifespan: 0,
+  printerPrice: null,
+  lifespan: null,
 
-  // Витратні частини
-  nozzlePrice: 0, // Середня ціна сопла
-  nozzleLifespan: 0, // Ресурс сопла (години)
-  bedPrice: 0, // Вартість столу/покриття
-  bedLifespan: 0, // Ресурс столу (години)
+  nozzlePrice: null,
+  nozzleLifespan: null,
+  bedPrice: null,
+  bedLifespan: null,
 
-  // Робота
-  hourlyRate: 0,
+  hourlyRate: null,
 
-  // Бізнес
-  failureRate: 0,
+  failureRate: null,
   markup: 100,
 
-  // Додаткові витрати
-  consumables: 0,
+  consumables: null,
 
-  // Кастомні витрати
   customExpenses: [],
 
-  // OLX
   includeOlxFee: false,
   olxFeePerItem: true,
 
-  // Batch printing
   batchCount: 1,
   weightPerModel: false,
 };

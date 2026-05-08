@@ -50,6 +50,7 @@ interface SaveManagerState {
   handleSave: () => void;
   handleSaveAndNew: () => void;
   clearSaveState: () => void;
+  loadSavedState: (state: import('../types/calculator').CalculationState, modelName: string, modelLink: string, note: string) => void;
 }
 
 export const useSaveManager = (
@@ -94,6 +95,7 @@ export const useSaveManager = (
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
   const isInitialMount = useRef(true);
   const skipNextAutoSave = useRef(false);
+  const savedSnapshotRef = useRef<string | null>(null);
 
   // Save autoSaveId to localStorage when changed
   useEffect(() => {
@@ -121,18 +123,19 @@ export const useSaveManager = (
     }
   }, [lastSaveTime]);
 
-  // Track unsaved changes
+  // Track unsaved changes by comparing current state snapshot against saved snapshot
   useEffect(() => {
-    const hasContent = !isEmptyForm || !!modelName || !!modelLink || !!note;
+    if (isSaving) return;
 
-    // If we just saved (lastSaveTime exists), mark as saved
-    if (lastSaveTime && !isSaving) {
+    const hasContent = !isEmptyForm || !!modelName || !!modelLink || !!note;
+    if (!hasContent) {
       setHasUnsavedChanges(false);
       return;
     }
 
-    setHasUnsavedChanges(hasContent);
-  }, [isEmptyForm, modelName, modelLink, note, isSaving, lastSaveTime]);
+    const currentSnapshot = JSON.stringify({ currentState, modelName, modelLink, note });
+    setHasUnsavedChanges(savedSnapshotRef.current !== currentSnapshot);
+  }, [currentState, isEmptyForm, modelName, modelLink, note, isSaving]);
 
   // Auto-save calculator state to history (debounced)
   useDebouncedEffect(
@@ -184,13 +187,14 @@ export const useSaveManager = (
         }
 
         setLastSaveTime(Date.now());
+        savedSnapshotRef.current = JSON.stringify({ currentState, modelName, modelLink, note });
       } catch (error) {
         console.error('Auto-save failed:', error);
       } finally {
         setIsSaving(false);
       }
     },
-    2000, // 2 second debounce delay
+    15000, // 15 second debounce delay
     [currentState, modelName, modelLink, note, editingId, isSaving, upsertCalculation, isEmptyForm, autoSaveId, hasUnsavedChanges]
   );
 
@@ -242,6 +246,7 @@ export const useSaveManager = (
         });
       }
       setLastSaveTime(Date.now());
+      savedSnapshotRef.current = JSON.stringify({ currentState, modelName, modelLink, note });
     } finally {
       setIsSaving(false);
     }
@@ -285,6 +290,7 @@ export const useSaveManager = (
     // Clear identifiers to prepare for a NEW calculation on next save
     setAutoSaveId(null);
     setLastSaveTime(null);
+    savedSnapshotRef.current = null;
 
     // Skip the next auto-save since we just saved and nothing changed yet
     skipNextAutoSave.current = true;
@@ -300,6 +306,19 @@ export const useSaveManager = (
   const clearSaveState = useCallback(() => {
     setAutoSaveId(null);
     setLastSaveTime(null);
+    savedSnapshotRef.current = null;
+  }, []);
+
+  // Load a saved state for editing — snapshots it so indicator starts green
+  const loadSavedState = useCallback((
+    state: import('../types/calculator').CalculationState,
+    mName: string,
+    mLink: string,
+    n: string
+  ) => {
+    setAutoSaveId(null);
+    setLastSaveTime(null);
+    savedSnapshotRef.current = JSON.stringify({ currentState: state, modelName: mName, modelLink: mLink, note: n });
   }, []);
 
   return {
@@ -311,5 +330,6 @@ export const useSaveManager = (
     handleSave,
     handleSaveAndNew,
     clearSaveState,
+    loadSavedState,
   };
 };

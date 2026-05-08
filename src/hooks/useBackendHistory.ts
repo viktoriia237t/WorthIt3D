@@ -32,10 +32,11 @@ export const useBackendHistory = (userId: string | null) => {
         localStorage.setItem(migrationKey, 'true');
       }
 
-      // Fetch latest from backend
+      // Fetch latest from backend and merge — backend wins on conflicts,
+      // but local-only entries are preserved (handles partial migration failures)
       try {
         const remote = await api.fetchCalculations();
-        localHistory.importHistory(remote, 'replace');
+        localHistory.importHistory(remote, 'update');
       } catch (error) {
         console.error('Failed to fetch calculations:', error);
       }

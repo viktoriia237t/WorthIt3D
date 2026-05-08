@@ -3,8 +3,8 @@ import { NumericFormat } from 'react-number-format';
 import { forwardRef } from 'react';
 
 interface NumberInputProps {
-  value: number;
-  onChange: (value: number) => void;
+  value: number | null;
+  onChange: (value: number | null) => void;
   label?: React.ReactNode;
   labelPlacement?: 'inside' | 'outside' | 'outside-left';
   placeholder?: string;
@@ -48,18 +48,16 @@ export const NumberInput = forwardRef<HTMLInputElement, NumberInputProps>(
   ) => {
     return (
       <NumericFormat
-        value={value}
+        value={value ?? ''}
         onValueChange={(values) => {
-          const numValue = values.floatValue || 0;
+          if (values.floatValue === undefined) {
+            onChange(null);
+            return;
+          }
 
-          // Apply min/max constraints
-          let constrainedValue = numValue;
-          if (min !== undefined && constrainedValue < min) {
-            constrainedValue = min;
-          }
-          if (max !== undefined && constrainedValue > max) {
-            constrainedValue = max;
-          }
+          let constrainedValue = values.floatValue;
+          if (min !== undefined && constrainedValue < min) constrainedValue = min;
+          if (max !== undefined && constrainedValue > max) constrainedValue = max;
 
           onChange(constrainedValue);
         }}

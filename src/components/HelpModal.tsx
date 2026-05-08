@@ -1,5 +1,5 @@
 import { Modal, ModalContent, ModalHeader, ModalBody, ModalFooter, Button, Accordion, AccordionItem } from '@heroui/react';
-import { HelpCircle, Package, DollarSign, Clock, Zap, TrendingDown, Briefcase, Plus, ShoppingCart } from 'lucide-react';
+import { HelpCircle, Package, DollarSign, Clock, Zap, TrendingDown, Briefcase, Plus, ShoppingCart, Save } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
 interface HelpModalProps {
@@ -52,6 +52,12 @@ export default function HelpModal({ isOpen, onOpenChange }: HelpModalProps) {
       title: t('help.sections.additional.title'),
       icon: <Plus size={18} />,
       content: t('help.sections.additional.content'),
+    },
+    {
+      key: 'autosave',
+      title: t('help.sections.autosave.title'),
+      icon: <Save size={18} />,
+      content: t('help.sections.autosave.content'),
     },
     {
       key: 'olx',

@@ -44,15 +44,15 @@ const ACCORDION_STATE_STORAGE_KEY = 'calculator-accordion-state';
 const ELECTRICITY_PERSISTENT_STORAGE_KEY = 'calculator-electricity-persistent';
 
 interface ElectricityPersistentState {
-    powerConsumption: number;
-    dryerConsumption: number;
-    electricityTariff: number;
-    printerPrice: number;
-    lifespan: number;
-    nozzlePrice: number;
-    nozzleLifespan: number;
-    bedPrice: number;
-    bedLifespan: number;
+    powerConsumption: number | null;
+    dryerConsumption: number | null;
+    electricityTariff: number | null;
+    printerPrice: number | null;
+    lifespan: number | null;
+    nozzlePrice: number | null;
+    nozzleLifespan: number | null;
+    bedPrice: number | null;
+    bedLifespan: number | null;
 }
 
 export const CalculatorForm: React.FC<CalculatorFormProps> = ({
@@ -173,7 +173,7 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({
         state.bedLifespan,
     ]);
 
-    const handleChange = (field: keyof CalculationState, value: number) => {
+    const handleChange = (field: keyof CalculationState, value: number | null) => {
         const newState = { ...state, [field]: value };
         setState(newState);
         // Mark that this is an internal update so useEffect won't reset the state
@@ -193,9 +193,9 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({
         const newFilament: FilamentEntry = {
             id: `fil-${Date.now()}`,
             name: '',
-            weight: 0,
-            spoolPrice: 0,
-            spoolWeight: 0,
+            weight: null,
+            spoolPrice: null,
+            spoolWeight: null,
         };
         const newState = { ...state, filaments: [...state.filaments, newFilament] };
         setState(newState);
@@ -203,7 +203,7 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({
         onStateChange(newState);
     };
 
-    const handleUpdateFilament = (id: string, field: 'name' | 'weight' | 'spoolPrice' | 'spoolWeight', value: string | number) => {
+    const handleUpdateFilament = (id: string, field: 'name' | 'weight' | 'spoolPrice' | 'spoolWeight', value: string | number | null) => {
         const newState = {
             ...state,
             filaments: state.filaments.map(f => f.id === id ? { ...f, [field]: value } : f),
@@ -225,7 +225,7 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({
         const newExpense: CustomExpense = {
             id: `exp-${Date.now()}`,
             name: '',
-            amount: 0,
+            amount: null,
             includeInFee: false,
             perItem: true,
         };
@@ -239,7 +239,7 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({
         onStateChange(newState);
     };
 
-    const handleUpdateCustomExpense = (id: string, field: 'name' | 'amount' | 'includeInFee' | 'perItem', value: string | number | boolean) => {
+    const handleUpdateCustomExpense = (id: string, field: 'name' | 'amount' | 'includeInFee' | 'perItem', value: string | number | boolean | null) => {
         const newState = {
             ...state,
             customExpenses: state.customExpenses.map(exp =>
@@ -326,7 +326,7 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({
                             labelPlacement="outside"
                             placeholder="1"
                             value={state.batchCount}
-                            onChange={(value) => handleChange('batchCount', Math.max(1, value))}
+                            onChange={(value) => handleChange('batchCount', Math.max(1, value ?? 1))}
                             min={1}
                             description={t('form.modelInfo.batchCountDesc')}
                         />

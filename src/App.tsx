@@ -123,6 +123,7 @@ function App() {
     handleSave,
     handleSaveAndNew,
     clearSaveState,
+    loadSavedState,
   } = saveManager;
 
   // Handle edit calculation from history
@@ -130,7 +131,12 @@ function App() {
     const calculation = getCalculation(id);
     if (calculation) {
       loadCalculation(id, calculation);
-      clearSaveState(); // Clear auto-save state when loading from history
+      loadSavedState(
+        calculation.state,
+        calculation.modelName ?? '',
+        calculation.modelLink ?? '',
+        calculation.note ?? ''
+      );
       setActiveTab('calculator');
     }
   };
@@ -357,7 +363,7 @@ function App() {
                 <div className="sticky top-4">
                   <CalculationResultComponent
                     result={result}
-                    weight={(currentState.filaments ?? []).reduce((s, f) => s + f.weight, 0)}
+                    weight={(currentState.filaments ?? []).reduce((s, f) => s + (f.weight ?? 0), 0)}
                     batchCount={currentState.batchCount}
                     olxFeePerItem={currentState.olxFeePerItem}
                   />

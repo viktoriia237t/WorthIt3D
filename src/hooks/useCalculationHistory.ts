@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
+import { uuidv7 } from '../utils/uuidv7';
 import type { CalculationHistory, CalculationState, CalculationResult } from '../types/calculator';
 import { migrateCalculationState } from '../utils/migrationHelpers';
 
@@ -36,7 +37,7 @@ export const useCalculationHistory = () => {
   const addCalculation = useCallback(
     (state: CalculationState, result: CalculationResult, note?: string, modelName?: string, modelLink?: string) => {
       const newEntry: CalculationHistory = {
-        id: `calc-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`,
+        id: uuidv7(),
         timestamp: Date.now(),
         state,
         result,
@@ -114,7 +115,7 @@ export const useCalculationHistory = () => {
   const upsertCalculation = useCallback(
     (id: string | null, state: CalculationState, result: CalculationResult, note?: string, modelName?: string, modelLink?: string): string => {
       // Generate ID before setHistory if needed
-      const savedId = id || `calc-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`;
+      const savedId = id || uuidv7();
 
       setHistory((prev) => {
         if (id) {

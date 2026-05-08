@@ -258,6 +258,31 @@
           "Added filament dryer parameters with electricity calculation",
           "Improved UI for custom expenses with batch mode support"
         ]
+      },
+      "0.8.0": {
+        "date": "May 8, 2026",
+        "changes": [
+          "Added multi-filament support for multi-material prints",
+          "Added batch mode for printing multiple models at once",
+          "Added filament dryer parameters with electricity calculation",
+          "Added auto-save while typing (15 second debounce)",
+          "Added save status indicator on save button (green/yellow dot)",
+          "Added cloud history sync when signed in with Google",
+          "Added history import and export",
+          "Added pinning calculations in history",
+          "Added PWA support (installable as app)",
+          "Added Google Analytics",
+          "Added calculator help guide and changelog modal",
+          "Added OLX commission toggle: per item or per batch",
+          "Added custom expenses with 'include in base cost' and 'per item' toggles",
+          "Fixed: empty fields no longer affect calculation (stored as null)",
+          "Fixed: duplicate entry created when saving after edit",
+          "Fixed: 'Save and New' was updating current entry instead of creating new",
+          "Fixed: net profit calculation after all expenses",
+          "Fixed: OLX commission formula for batch mode",
+          "Improved: history entry IDs now use UUID v7",
+          "Improved: backend sync preserves local-only entries on sign-in"
+        ]
       }
     }
   },
@@ -266,11 +291,11 @@
     "sections": {
       "modelInfo": {
         "title": "Model Information",
-        "content": "📦 BASIC MODEL PARAMETERS\n\n• Weight (grams): Total plastic weight needed for the model including supports. Measured in grams.\n  → Affects: Material cost directly\n  → How to measure: Use slicer software (Cura, PrusaSlicer) for accurate calculation\n\n• Print Time (hours): Total time the printer spends printing the model.\n  → Affects: Electricity and equipment depreciation\n  → Important: Take time from slicer + 10-15% safety margin\n\n• Batch Mode: Printing multiple identical models at once.\n  → Benefits: Time savings on prep, efficient bed usage\n  → How it works: Weight can be per model (with multiplication) or for entire batch\n  → Example: 5 keychains at 10g = 50g total\n\n• Weight Per Model (toggle):\n  → ON: Entered weight will be multiplied by batch count automatically\n  → OFF: Entered weight already accounts for entire batch"
+        "content": "📦 BASIC MODEL PARAMETERS\n\n• Name and Link: Model identifier for easy search in history.\n  → Link can point to Printables, Thingiverse, or your own file\n\n• Batch Mode: Printing multiple identical models at once.\n  → Benefits: Time savings on prep, efficient bed usage\n  → Example: 5 keychains at 10g = 50g total\n\n• Weight Per Model (toggle):\n  → ON: Entered weight will be multiplied by batch count automatically\n  → OFF: Entered weight already accounts for entire batch\n\n🎨 MULTI-MATERIAL PRINTING\n\nAdd multiple filaments to calculate true cost of mixed-material prints:\n  → Click \"+ Add filament\" for each color or material\n  → Enter weight and spool price for each separately\n  → Total material cost is the sum of all filaments\n  → Example: PLA base (40g) + PETG detail (10g) = two rows"
       },
       "materials": {
         "title": "Material Costs",
-        "content": "💰 MATERIAL COST CALCULATION\n\nFormula: (model weight ÷ spool weight) × spool price\n\n• Spool Price: What you paid for the filament spool\n  → Standard weights: 1000g (1kg), 500g, 250g\n  → Tip: Include shipping cost in spool price calculation\n\n• Spool Economics: Understanding true material cost\n  → Example: 1kg spool for $20 = $0.02 per gram\n  → 50g model = 50 × 0.02 = $1.00 for material\n\n• Measurement Accuracy:\n  → Use slicer weight, not CAD model weight\n  → Don't forget supports (add 10-30% to weight)\n  → Brim and other helper elements also have weight\n\n• Different Materials:\n  → PLA: Cheapest, standard choice\n  → PETG: Slightly more expensive, stronger\n  → ABS, Nylon: Specialty materials, higher cost"
+        "content": "💰 MATERIAL COST CALCULATION\n\nFormula (per filament): (model weight ÷ spool weight) × spool price\n\n• Spool Price: What you paid for the filament spool\n  → Standard weights: 1000g (1kg), 500g, 250g\n  → Tip: Include shipping cost in spool price calculation\n\n• Multi-material printing:\n  → Add a separate row for each filament\n  → Each row has its own weight and spool\n  → Total cost = sum of all filaments\n  → Example: PLA 1kg for $20 (used 40g) + PETG 1kg for $30 (used 10g)\n     = 40×$0.02 + 10×$0.03 = $0.80 + $0.30 = $1.10\n\n• Measurement Accuracy:\n  → Use slicer weight, not CAD model weight\n  → Don't forget supports (add 10-30% to weight)\n  → Brim and other helper elements also have weight\n\n• Common Materials:\n  → PLA: Cheapest, standard choice\n  → PETG: Slightly more expensive, stronger\n  → ABS, Nylon: Specialty materials, higher cost"
       },
       "time": {
         "title": "Time & Labor",
@@ -295,6 +320,10 @@
       "olx": {
         "title": "OLX Commission",
         "content": "🛒 OLX MARKETPLACE\n\nWhat it is: Popular marketplace in Ukraine for selling goods.\n\nOLX Commission Structure:\n→ 2% of item price\n→ + $0.80 fixed fee per transaction\n\n📊 TWO CALCULATION MODES\n\nYour mode choice depends on HOW you sell models:\n\n1️⃣ \"PER ITEM\" MODE (Per Item = ON)\n\nUse when: Selling each model as separate listing\n\nFormula: (model price × 1.02 + $0.80) × model count\n\nExample: Keychain $5, made 5 pcs, selling separately\n→ Commission for 1: $5 × 1.02 + $0.80 = $5.90\n→ Commission for 5: $5.90 × 5 = $29.50\n→ You receive: $29.50 from clients\n→ Net profit: $29.50 - ($5×5) = $4.50\n\nWhen to use:\n✓ Selling individually to different clients\n✓ 5 separate listings for 5 keychains\n✓ Each model - separate OLX transaction\n\n2️⃣ \"BATCH\" MODE (Per Item = OFF)\n\nUse when: Selling all models as one set\n\nFormula: (total price × 1.02) + $0.80\n\nExample: Set of 5 keychains, total price $25\n→ OLX commission: $25 × 1.02 + $0.80 = $26.30\n→ You receive: $26.30 from one client\n→ One transaction, one commission\n\nWhen to use:\n✓ Selling set to one client\n✓ One listing \"Set of 5 keychains\"\n✓ Single OLX transaction\n\n🎯 COMPARISON EXAMPLE\n\nScenario: 5 models at $5 each (total $25)\n\n📌 Individual Sales (Per Item ON):\n→ Client price per item: $5.90\n→ 5 transactions at $5.90 = $29.50 total\n→ OLX commission: ($5×1.02+$0.80)×5 = $4.50\n→ You keep: $29.50 - $4.50 = $25 (your price)\n\n📦 Batch Sale (Per Item OFF):\n→ Client price for set: $26.30\n→ 1 transaction at $26.30\n→ OLX commission: $25×1.02+$0.80 = $26.30 - $25 = $1.30\n→ You keep: $26.30 - $1.30 = $25 (your price)\n\nDifference:\n→ Individual: Clients pay more ($29.50 vs $26.30)\n→ Batch: More economical for client, faster sale\n\n💡 STRATEGY CHOICE\n\n✅ Sell INDIVIDUALLY when:\n→ High-demand items (keychains, figurines)\n→ Different clients buy 1 pc each\n→ Have time for multiple listings\n→ Can get higher total revenue\n\n✅ Sell as BATCH when:\n→ Sets that go together\n→ Want to quickly sell entire batch\n→ Client wants multiple at once\n→ Save on OLX commission\n\n⚠️ IMPORTANT\n\n• Calculator shows price FOR CLIENT (including commission)\n• You receive your stated price minus OLX commission\n• Commission is always deducted from you as seller\n• Mode choice doesn't affect your profit, only client price"
+      },
+      "autosave": {
+        "title": "Auto-save & Status Indicator",
+        "content": "💾 AUTO-SAVE\n\nThe calculator automatically saves your calculation to history as you type.\n\n• Delay: 15 seconds after the last change\n  → Changes are saved automatically without pressing any button\n  → On next app open, your calculation will be restored\n\n🟢 SAVE STATUS INDICATOR\n\nThe colored dot on the save button shows current save state:\n\n• 🟢 Green dot: Calculation is saved, no changes\n  → Auto-save or manual save completed\n  → Current form state matches what's saved\n\n• 🟡 Yellow dot: There are unsaved changes\n  → You changed something after the last save\n  → Auto-save will trigger in 15 sec, or press save manually\n\n• No dot: Form is empty, nothing to save\n\n🔘 SAVE BUTTONS\n\n• 💾 (Save): Save the current calculation\n  → If an auto-saved draft exists — updates it\n  → If new — creates an entry in history\n\n• 📄+ (Save and New): Save current and start a new one\n  → Current calculation is saved\n  → Form is cleared for a new calculation\n  → Electricity and depreciation settings are preserved\n\n• 🗑️ (Clear): Clear the form without saving"
       }
     }
   }

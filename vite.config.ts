@@ -7,9 +7,13 @@ export default defineConfig({
   server: {
     host: '0.0.0.0',
     port: 5173,
+    https: {
+      key: './certs/localhost-key.pem',
+      cert: './certs/localhost.pem',
+    },
     hmr: {
-      host: 'worthit.localhost',
-      clientPort: 443,
+      host: 'localhost',
+      clientPort: 5173,
     },
   },
   build: {

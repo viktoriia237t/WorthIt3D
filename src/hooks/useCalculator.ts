@@ -7,15 +7,39 @@ export const useCalculator = (state: CalculationState): CalculationResult => {
 
   return useMemo(() => {
     // Ensure backward compatibility with old calculations
+    const n = (v: number | null | undefined): number => v ?? 0;
     const normalizedState = {
       ...state,
       batchCount: state.batchCount ?? 1,
       weightPerModel: state.weightPerModel ?? true,
-      filaments: state.filaments ?? [],
+      filaments: (state.filaments ?? []).map(f => ({
+        ...f,
+        weight: n(f.weight),
+        spoolPrice: n(f.spoolPrice),
+        spoolWeight: n(f.spoolWeight),
+      })),
+      printTime: n(state.printTime),
+      prepTime: n(state.prepTime),
+      postTime: n(state.postTime),
+      dryTime: n(state.dryTime),
+      powerConsumption: n(state.powerConsumption),
+      dryerConsumption: n(state.dryerConsumption),
+      electricityTariff: n(state.electricityTariff),
+      printerPrice: n(state.printerPrice),
+      lifespan: n(state.lifespan),
+      nozzlePrice: n(state.nozzlePrice),
+      nozzleLifespan: n(state.nozzleLifespan),
+      bedPrice: n(state.bedPrice),
+      bedLifespan: n(state.bedLifespan),
+      hourlyRate: n(state.hourlyRate),
+      failureRate: n(state.failureRate),
+      markup: n(state.markup),
+      consumables: n(state.consumables),
       customExpenses: (state.customExpenses ?? []).map(exp => ({
         ...exp,
-        perItem: exp.perItem ?? true
-      }))
+        amount: n(exp.amount),
+        perItem: exp.perItem ?? true,
+      })),
     };
 
     // Determine if batch mode is active (count > 1)
