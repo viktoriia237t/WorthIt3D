@@ -326,5 +326,9 @@
         "content": "💾 AUTO-SAVE\n\nThe calculator automatically saves your calculation to history as you type.\n\n• Delay: 15 seconds after the last change\n  → Changes are saved automatically without pressing any button\n  → On next app open, your calculation will be restored\n\n🟢 SAVE STATUS INDICATOR\n\nThe colored dot on the save button shows current save state:\n\n• 🟢 Green dot: Calculation is saved, no changes\n  → Auto-save or manual save completed\n  → Current form state matches what's saved\n\n• 🟡 Yellow dot: There are unsaved changes\n  → You changed something after the last save\n  → Auto-save will trigger in 15 sec, or press save manually\n\n• No dot: Form is empty, nothing to save\n\n🔘 SAVE BUTTONS\n\n• 💾 (Save): Save the current calculation\n  → If an auto-saved draft exists — updates it\n  → If new — creates an entry in history\n\n• 📄+ (Save and New): Save current and start a new one\n  → Current calculation is saved\n  → Form is cleared for a new calculation\n  → Electricity and depreciation settings are preserved\n\n• 🗑️ (Clear): Clear the form without saving"
       }
     }
+  },
+  "auth": {
+    "signIn": "Sign in with Google",
+    "signOut": "Sign out"
   }
 }
